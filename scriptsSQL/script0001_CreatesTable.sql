@@ -4,7 +4,7 @@
 CREATE TABLE Usuario(
     UsuarioId INTEGER PRIMARY KEY,
     Nome VARCHAR(200) NULL,
-    Tipo VARCHAR NOT NULL,
+    Tipo VARCHAR NULL,
     Localizacao VARCHAR(200) NULL,
     Descricao VARCHAR(2000) NULL,
     Zap VARCHAR NULL,
