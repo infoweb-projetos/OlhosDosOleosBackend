@@ -1,9 +1,15 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
+import { authenticateToken } from './middleware';
+
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const SECRET_KEY = 't';
 
 app.use(cors());
 app.use(express.json());
@@ -52,12 +58,56 @@ app.post('/api/usuario', async (req: Request, res: Response) => {
 
       return res.status(400).json({ error: msgErro });
     }
-
-    if (data) console.log('Dados inseridos com sucesso:', data);
-    if (data) res.status(201).json({ data: data[0] });
+    res.status(201).json({ data: { nome, tipo, localizacao, descricao, zap, insta, face, twitter, foto, Senha, Email } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error });
+  }
+});
+
+app.post('/api/login', async (req: Request, res: Response) => {
+  const { loginUsuario, loginSenha } = req.body;
+
+  try {
+    // Verifique as credenciais
+    const { data, error } = await supabase
+      .from('usuario')
+      .select()
+      .eq('Email', loginUsuario)
+      .single();
+
+    if (error || !data || data.Senha !== loginSenha) {
+      return res.status(401).json({ error: 'Credenciais inválidas' });
+    }
+
+    // Gere um token JWT ou qualquer outro tipo de token
+    const token = jwt.sign({ userId: data.usuarioid, userNome: data.nome }, SECRET_KEY, { expiresIn: '1h' });
+
+    res.status(200).json({ token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao fazer login' });
+  }
+});
+
+app.get('/api/usuario', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user.userId;
+    const { data, error } = await supabase
+      .from('usuario')
+      .select('usuarioid, nome, tipo, localizacao, descricao, foto, Email')
+      .eq('usuarioid', userId)
+      .single();
+
+    if (error) {;
+      throw new Error(error.message);
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.log("3");
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao obter informações do usuário' });
   }
 });
 
@@ -99,7 +149,7 @@ app.get('/api/estados', async (req: Request, res: Response) => {
 app.get('/api/cidades', async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
-      .from('cidade') 
+      .from('cidade')
       .select('nome');
 
     if (error) {
@@ -116,7 +166,7 @@ app.get('/api/cidades', async (req: Request, res: Response) => {
 app.get('/api/especializacoes', async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
-      .from('especializacao') 
+      .from('especializacao')
       .select('nome');
 
     if (error) {
