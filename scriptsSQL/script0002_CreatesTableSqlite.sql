@@ -1,105 +1,83 @@
 --Create table Usuario
 CREATE TABLE Usuario(
-    UsuarioId INTEGER PRIMARY KEY,
-    Nome VARCHAR(200) NULL,
-    Senha VARCHAR NOT NULL,
-    Email VARCHAR NOT NULL,
-    Tipo VARCHAR NULL,
-    Localizacao VARCHAR(200) NULL,
-    Descricao VARCHAR(2000) NULL,
-    Zap VARCHAR NULL,
-    Insta VARCHAR NULL,
-    Face VARCHAR NULL,
-    Twitter VARCHAR NULL,
-    Foto VARCHAR NULL
+    UsuarioId INTEGER PRIMARY KEY AUTOINCREMENT,
+    Nome TEXT NULL,
+    Senha TEXT NOT NULL,
+    Email TEXT NOT NULL UNIQUE,
+    Tipo TEXT NULL,
+    Localizacao TEXT NULL,
+    Descricao TEXT NULL,
+    Zap TEXT NULL,
+    Insta TEXT NULL,
+    Face TEXT NULL,
+    Twitter TEXT NULL,
+    Foto TEXT NULL
 );
---PostGREE
-create table
-  public.usuario (
-    usuarioid serial not null,
-    nome character varying(200) not null,
-    tipo character varying null,
-    localizacao character varying(200) null,
-    descricao character varying(2000) null,
-    zap character varying null,
-    insta character varying null,
-    face character varying null,
-    twitter character varying null,
-    foto character varying null,
-    "Senha" character varying not null,
-    "Email" character varying not null,
-    constraint usuario_pkey primary key (usuarioid),
-    constraint usuario_Email_key unique ("Email")
-  ) tablespace pg_default;
 
 --Create table Categoria
 CREATE TABLE Categoria(
-    Texto VARCHAR(100) PRIMARY KEY
+    Texto TEXT PRIMARY KEY
 );
 
 --Create table Obra
 CREATE TABLE Obra(
-    ObraId INTEGER PRIMARY KEY,
-    Titulo VARCHAR(200) NULL,
-    Descricao VARCHAR(2000) NULL,
+    ObraId INTEGER PRIMARY KEY AUTOINCREMENT,
+    Titulo TEXT NULL,
+    Descricao TEXT NULL,
     UsuarioId INTEGER NOT NULL,
-    Categoria VARCHAR(100) NOT NULL,
-    FOREIGN KEY (UsuarioId) REFERENCES Usuario(UsuarioId)
+    Categoria TEXT NOT NULL,
+    FOREIGN KEY (UsuarioId) REFERENCES Usuario(UsuarioId),
     FOREIGN KEY (Categoria) REFERENCES Categoria(Texto)
 );
 
-CREATE TABLE Img( --imgs associadas a obra
-    ImgId INTEGER PRIMARY KEY,
-    Foto VARCHAR NOT NULL,
-    ObraId INTEGER NOT NULL, --obra da imagem
+--Create table Img (imgs associadas a obra)
+CREATE TABLE Img(
+    ImgId INTEGER PRIMARY KEY AUTOINCREMENT,
+    Foto TEXT NOT NULL,
+    ObraId INTEGER NOT NULL,
     FOREIGN KEY (ObraId) REFERENCES Obra(ObraId)
 );
 
 --Create table Tag
 CREATE TABLE Tag(
-    Texto VARCHAR(100) PRIMARY KEY,
+    Texto TEXT PRIMARY KEY,
     ObraId INTEGER NOT NULL,
     FOREIGN KEY (ObraId) REFERENCES Obra(ObraId)
 );
 
 --Create table Mensagens
 CREATE TABLE Mensagem(
-    MensagemId INTEGER PRIMARY KEY,   
-    Conteudo VARCHAR NOT NULL,
+    MensagemId INTEGER PRIMARY KEY AUTOINCREMENT,
+    Conteudo TEXT NOT NULL,
     UsuarioOrigemId INTEGER NOT NULL,
-    UsuarioDestinoId INTEGER NULL, 
-    ObraId INTEGER NULL, --obra e origem são nulos para no codigo identifcar se a menssagem é para um post ou para um usuario
+    UsuarioDestinoId INTEGER NULL,
+    ObraId INTEGER NULL,
     FOREIGN KEY (UsuarioOrigemId) REFERENCES Usuario(UsuarioId),
     FOREIGN KEY (UsuarioDestinoId) REFERENCES Usuario(UsuarioId),
     FOREIGN KEY (ObraId) REFERENCES Obra(ObraId)
 );
 
-
 --enums/select
-create table  public.pais (
-  nome character varying(200) not null,
-  constraint pais_pkey primary key (nome)
-);
-INSERT INTO public.pais (nome) VALUES ('Brasil');
-
-CREATE TABLE public.estado (
-    nome character varying(200) not null,
-    CONSTRAINT estado_pkey PRIMARY KEY (nome)
+CREATE TABLE Pais (
+    Nome TEXT PRIMARY KEY
 );
 
-CREATE TABLE public.cidade (
-    nome character varying(200) not null,
-    CONSTRAINT cidade_pkey PRIMARY KEY (nome)
+INSERT INTO Pais (Nome) VALUES ('Brasil');
+
+CREATE TABLE Estado (
+    Nome TEXT PRIMARY KEY
 );
 
+CREATE TABLE Cidade (
+    Nome TEXT PRIMARY KEY
+);
 
-create table public.especializacao (
-    nome character varying(200) not null,
-    constraint espicializacao_pkey primary key (nome)
-); 
+CREATE TABLE Especializacao (
+    Nome TEXT PRIMARY KEY
+);
 
-
-INSERT INTO public.estado (nome) VALUES
+-- Inserts
+INSERT INTO Estado (Nome) VALUES
 ('AC'),  -- Acre
 ('AL'),  -- Alagoas
 ('AM'),  -- Amazonas
@@ -127,7 +105,7 @@ INSERT INTO public.estado (nome) VALUES
 ('TO'),  -- Tocantins
 ('DF');  -- Distrito Federal
 
-INSERT INTO public.cidade (nome) VALUES
+INSERT INTO Cidade (Nome) VALUES
 ('São Paulo'),
 ('Rio de Janeiro'),
 ('Salvador'),
@@ -223,7 +201,8 @@ INSERT INTO public.cidade (nome) VALUES
 ('Araraquara'),
 ('Assis'),
 ('Bragança Paulista');
-INSERT INTO public.especializacao (nome) VALUES
+
+INSERT INTO Especializacao (Nome) VALUES
 ('Artista Digital'),
 ('Artista de Aquarela'),
 ('Artista de Papel'),
