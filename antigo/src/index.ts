@@ -38,6 +38,7 @@ app.post('/api/usuario', async (req: Request, res: Response) => {
           foto: foto,
           Senha: Senha,
           Email: Email,
+          data: new Date(),
         }
       );
     if (error) {
@@ -95,7 +96,7 @@ app.get('/api/usuario', authenticateToken, async (req: Request, res: Response) =
     const userId = req.user.userId;
     const { data, error } = await supabase
       .from('usuario')
-      .select('usuarioid, nome, tipo, localizacao, descricao, foto, Email')
+      .select('usuarioid, nome, tipo, localizacao, descricao, foto, Email, insta, zap, face')
       .eq('usuarioid', userId)
       .single();
 
