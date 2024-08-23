@@ -1,18 +1,3 @@
---Create table Usuario
-CREATE TABLE Usuario(
-    UsuarioId INTEGER PRIMARY KEY,
-    Nome VARCHAR(200) NULL,
-    Senha VARCHAR NOT NULL,
-    Email VARCHAR NOT NULL,
-    Tipo VARCHAR NULL,
-    Localizacao VARCHAR(200) NULL,
-    Descricao VARCHAR(2000) NULL,
-    Zap VARCHAR NULL,
-    Insta VARCHAR NULL,
-    Face VARCHAR NULL,
-    Twitter VARCHAR NULL,
-    Foto VARCHAR NULL
-);
 --PostGREE
 create table
   public.usuario (
