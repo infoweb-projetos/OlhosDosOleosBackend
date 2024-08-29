@@ -8,21 +8,13 @@ export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
   @Post()
-  async create(@Body() createUsuarioDto: CreateUsuarioDto) {
-    return {
-      estado: 'ok',
-      mensagem: 'usuario criada',
-      dados: await this.usuariosService.create(createUsuarioDto),
-    };
+  create(@Body() createUsuarioDto: CreateUsuarioDto) {
+    return this.usuariosService.create(createUsuarioDto);
   }
 
   @Get()
-  async findAll() {
-    return {
-      estado: 'ok',
-      mensagem: 'todas as tarefas listadas',
-      dados: await this.usuariosService.findAll(),
-    };
+  findAll() {
+    return this.usuariosService.findAll();
   }
 
   @Get(':id')
