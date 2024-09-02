@@ -3,20 +3,20 @@
 GET http://localhost:3000/
 
 ### GET recupera todos os usuarios
-GET http://localhost:3000/usuarios/
+GET http://localhost:3000/usuarios/listar/
 
 ### Criar Usuario
-POST http://localhost:3000/usuarios/
+POST http://localhost:3000/usuarios/criar/
 Content-type: application/json
 
 {
-    "nome": "Thiago",
-    "email": "thiago@gmail.com",
+    "nome": "Clark",
+    "email": "clarkent@gmail.com",
     "senha": "123"
 }
 // extenção: rest client
 
-###
+### Login dando certo
 POST http://localhost:3000/autenticacao/login
 Content-type: application/json
 
@@ -25,7 +25,7 @@ Content-type: application/json
     "senha": "123"
 }
 
-###
+### Login dabndo errado
 POST http://localhost:3000/autenticacao/login
 Content-type: application/json
 
@@ -34,4 +34,23 @@ Content-type: application/json
     "senha": "321"
 }
 
+### acessando perfil
+GET  http://localhost:3000/autenticacao/perfil
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoxLCJpYXQiOjE3MjUyMzkwNTEsImV4cCI6MTcyNTIzOTM1MX0.a26SMtg_GeLPEKmkvucxFJn9xFa2rp_7BxbET3KV3eM
+
+### GET recupera o usuario de id 1
+GET http://localhost:3000/usuarios/achar/3
+
+### DELETE apaga o usuario de id 1
+DELETE http://localhost:3000/usuarios/apagar/2
+
+### PATCH atualiza o usuario de id 1
+PATCH http://localhost:3000/usuarios/atualizar/2
+content-type: application/json
+
+{
+   "nome": "Clark Kent",
+   "email": "clarkent@gmail.com",
+   "senha": "123"
+}
 

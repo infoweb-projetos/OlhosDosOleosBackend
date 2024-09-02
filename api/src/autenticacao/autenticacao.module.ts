@@ -4,8 +4,9 @@ import { AutenticacaoController } from './autenticacao.controller';
 import { PersistenciaModule } from 'src/persistencia/persistencia.module';
 import {PassportModule} from '@nestjs/passport';
 import {JwtModule} from '@nestjs/jwt';
+import { JwtStrategy } from 'src/jwt/jwt.strategy';
 
-const jwtSecret = 'alunos@infoweb@cnat';
+export const jwtSecret = 'alunos@infoweb@cnat';
 
 @Module({
   controllers: [AutenticacaoController],
@@ -13,6 +14,6 @@ const jwtSecret = 'alunos@infoweb@cnat';
     secret: jwtSecret,
     signOptions: {expiresIn: '5m'},
   })],
-  providers: [AutenticacaoService],
+  providers: [AutenticacaoService, JwtStrategy],
 })
 export class AutenticacaoModule {}
