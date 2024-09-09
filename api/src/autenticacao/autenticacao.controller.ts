@@ -11,12 +11,4 @@ export class AutenticacaoController {
   autenticar(@Body() login: LoginDto) {
     return this.autenticacaoService.login(login.email, login.senha)
   }
-
-  @Get('/perfil')
-  @UseGuards(JwtAuthGuard)
-  perfil() {
-    return {
-      statusCode: 'ok',
-    }
-  }
 }

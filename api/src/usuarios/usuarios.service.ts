@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PersistenciaService } from 'src/persistencia/persistencia.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsuariosService {
-  constructor(private persistencia: PersistenciaService) { }
+  constructor(private persistencia: PersistenciaService, private jwt: JwtService) { }
 
   async create(createUsuarioDto: CreateUsuarioDto) {
     const usuario = await this.persistencia.usuario.create({
@@ -24,7 +25,24 @@ export class UsuariosService {
     };
   }
 
-  async findOne(id: number) {
+  async acharUsuarioToken(token: string) {
+    const tokenDescodificado = this.jwt.decode(token);
+    const usuario = await this.persistencia.usuario.findUnique({
+      where: { id: tokenDescodificado.usuario },
+    });
+    if (usuario) {
+      return {
+        estado: 'ok',
+        dados: usuario,
+      };
+    } else {
+      return {
+        estado: 'nok',
+        mensagem: `usuario com ${tokenDescodificado} não existe!`,
+      };
+    }
+  }
+  async acharUsuarioId(id: number) {
     const usuario = await this.persistencia.usuario.findUnique({
       where: { id: id },
     });

@@ -4,14 +4,15 @@ GET http://localhost:3000/
 
 ### GET recupera todos os usuarios
 GET http://localhost:3000/usuarios/listar/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoxLCJpYXQiOjE3MjU5MjIxMTcsImV4cCI6MTcyNTkyMjQxN30.fxWqQAAVGuB6Oh8OLEVKNdl8sn1qFSDUnALmjUkBX_I
 
 ### Criar Usuario
 POST http://localhost:3000/usuarios/criar/
 Content-type: application/json
 
 {
-    "nome": "Clark",
-    "email": "clarkent@gmail.com",
+    "nome": "Goku",
+    "email": "songoku@gmail.com",
     "senha": "123"
 }
 // extenção: rest client
@@ -35,11 +36,11 @@ Content-type: application/json
 }
 
 ### acessando perfil
-GET  http://localhost:3000/autenticacao/perfil
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoxLCJpYXQiOjE3MjUyMzkwNTEsImV4cCI6MTcyNTIzOTM1MX0.a26SMtg_GeLPEKmkvucxFJn9xFa2rp_7BxbET3KV3eM
+GET  http://localhost:3000/usuarios/perfil
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoxLCJpYXQiOjE3MjU5MjIxMTcsImV4cCI6MTcyNTkyMjQxN30.fxWqQAAVGuB6Oh8OLEVKNdl8sn1qFSDUnALmjUkBX_I
 
 ### GET recupera o usuario de id 1
-GET http://localhost:3000/usuarios/achar/3
+GET http://localhost:3000/usuarios/outroperfil/1
 
 ### DELETE apaga o usuario de id 1
 DELETE http://localhost:3000/usuarios/apagar/2
