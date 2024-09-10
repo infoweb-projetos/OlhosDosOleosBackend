@@ -26,7 +26,7 @@ export class UsuariosService {
   }
 
   async acharUsuarioToken(token: string) {
-    const tokenDescodificado = this.jwt.decode(token);
+    const tokenDescodificado = this.jwt.verify(token);
     const usuario = await this.persistencia.usuario.findUnique({
       where: { id: tokenDescodificado.usuario },
     });

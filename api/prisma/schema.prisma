@@ -15,5 +15,14 @@ model Usuario {
   nome  String
   email String  @unique
   senha String  
+  usuario String
+  localizacao String?
+  insta String?
+  youtube String?
+  zap String?
+  face String?
+  tipo String?
+  biografia String?
+  imagem String?
 }
 

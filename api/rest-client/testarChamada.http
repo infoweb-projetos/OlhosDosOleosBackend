@@ -13,7 +13,8 @@ Content-type: application/json
 {
     "nome": "Goku",
     "email": "songoku@gmail.com",
-    "senha": "123"
+    "senha": "123",
+    "usuario": "Son"
 }
 // extenção: rest client
 
@@ -37,8 +38,7 @@ Content-type: application/json
 
 ### acessando perfil
 GET  http://localhost:3000/usuarios/perfil
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoxLCJpYXQiOjE3MjU5MjIxMTcsImV4cCI6MTcyNTkyMjQxN30.fxWqQAAVGuB6Oh8OLEVKNdl8sn1qFSDUnALmjUkBX_I
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoxLCJpYXQiOjE3MjYwMDQzNzMsImV4cCI6MTcyNjAwNDY3M30.wLN5S3m4rHL0cfXpPf7CASac3DA4aY75Dx7bnVh1rNU
 ### GET recupera o usuario de id 1
 GET http://localhost:3000/usuarios/outroperfil/1
 
