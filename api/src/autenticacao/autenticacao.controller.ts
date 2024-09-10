@@ -11,4 +11,11 @@ export class AutenticacaoController {
   autenticar(@Body() login: LoginDto) {
     return this.autenticacaoService.login(login.email, login.senha)
   }
+  @Get('teste')
+  @UseGuards(JwtAuthGuard)
+  teste() {
+    return {
+      status: 'ok',
+    }
+  }
 }

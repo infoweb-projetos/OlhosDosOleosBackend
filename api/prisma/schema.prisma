@@ -15,7 +15,7 @@ model Usuario {
   nome  String
   email String  @unique
   senha String  
-  usuario String
+  usuario String  @unique
   localizacao String?
   insta String?
   youtube String?

@@ -15,5 +15,6 @@ export const jwtSecret = 'alunos@infoweb@cnat';
     signOptions: {expiresIn: '5m'},
   })],
   providers: [AutenticacaoService, JwtStrategy],
+  exports: [JwtModule],
 })
 export class AutenticacaoModule {}

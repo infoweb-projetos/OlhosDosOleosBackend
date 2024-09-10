@@ -38,7 +38,10 @@ Content-type: application/json
 
 ### acessando perfil
 GET  http://localhost:3000/usuarios/perfil
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoxLCJpYXQiOjE3MjYwMDQzNzMsImV4cCI6MTcyNjAwNDY3M30.wLN5S3m4rHL0cfXpPf7CASac3DA4aY75Dx7bnVh1rNU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoxLCJpYXQiOjE3MjYwMTAxMjgsImV4cCI6MTcyNjAxMDQyOH0.Odi_dNWag_RYBAIhyzwInH6grjfcQpgoLxQPc2w9SwY
+### acessando perfil
+GET  http://localhost:3000/autenticacao/teste
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoxLCJpYXQiOjE3MjYwMTAxMjgsImV4cCI6MTcyNjAxMDQyOH0.Odi_dNWag_RYBAIhyzwInH6grjfcQpgoLxQPc2w9SwY
 ### GET recupera o usuario de id 1
 GET http://localhost:3000/usuarios/outroperfil/1
 

@@ -8,12 +8,18 @@ export class AutenticacaoService {
     constructor(private persistencia: PersistenciaService, private jwt: JwtService){}
 
     async login(email: string, senha: string): Promise<TokenDto>{
-        const usuario = await this.persistencia.usuario.findUnique({
+        let usuario = await this.persistencia.usuario.findUnique({
             where: { email: email},
         });
 
         if (!usuario){
-            throw new NotFoundException(`Usuario com o email: ${email} não encontrado`);
+            usuario = await this.persistencia.usuario.findUnique({
+                where: { usuario: email},
+            });
+        }
+
+        if (!usuario){
+            throw new NotFoundException(`Usuario com o email ou nome de usuario: ${email} não encontrado`);
         }
 
         const ehSenhaValida = usuario.senha === senha;
