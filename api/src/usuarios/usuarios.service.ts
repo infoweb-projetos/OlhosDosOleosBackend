@@ -8,9 +8,23 @@ import { JwtService } from '@nestjs/jwt';
 export class UsuariosService {
   constructor(private persistencia: PersistenciaService, private jwt: JwtService) { }
 
-  async create(createUsuarioDto: CreateUsuarioDto) {
+  async create(usu: CreateUsuarioDto, arq: Express.Multer.File) {
+    usu.imagem = arq ? arq.buffer : null;
     const usuario = await this.persistencia.usuario.create({
-      data: createUsuarioDto,
+      data: {
+        nome: usu.nome,
+        email: usu.email,
+        senha: usu.senha,
+        usuario: usu.usuario,
+        cidade: usu.cidadeid ? { connect: { id: Number(usu.cidadeid) } } : undefined,
+        insta: usu.insta,
+        youtube: usu.youtube,
+        zap: usu.zap,
+        face: usu.face,
+        tipo: usu.tipoid ? { connect: { nome: usu.tipoid } } : undefined,
+        biografia: usu.biografia,
+        imagem: usu.imagem,
+      },
     });
     return {
       estado: 'ok',

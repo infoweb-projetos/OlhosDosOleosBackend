@@ -1,16 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes } from '@nestjs/swagger';
 
 @Controller('usuarios')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
   @Post('criar')
-  create(@Body() createUsuarioDto: CreateUsuarioDto) {
-    return this.usuariosService.create(createUsuarioDto);
+  @UseInterceptors(FileInterceptor('imagem'))
+  @ApiConsumes('multipart/form-data')
+  create(@Body() createUsuarioDto: CreateUsuarioDto, @UploadedFile() arq: Express.Multer.File) {
+    return this.usuariosService.create(createUsuarioDto, arq);
   }
 
   @Get('listar')

@@ -10,19 +10,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Estado {
+  id       Int      @id @default(autoincrement()) 
+  nome     String   
+  cidades  Cidade[] 
+}
+
+model Cidade {
+  id       Int      @id @default(autoincrement())
+  nome     String
+  estado   Estado   @relation(fields: [estadoid], references: [id]) 
+  estadoid Int  
+  usuarios Usuario[]     
+}
+
+model TipoArtista {
+  nome String @id
+  usuarios Usuario[]
+}
+
 model Usuario {
   id    Int     @id @default(autoincrement())
   nome  String
   email String  @unique
   senha String  
   usuario String  @unique
-  localizacao String?
+  cidade Cidade? @relation(fields: [cidadeid], references: [id]) 
+  cidadeid  Int?    
   insta String?
   youtube String?
   zap String?
   face String?
-  tipo String?
+  tipo TipoArtista? @relation(fields: [tipoid], references: [nome]) 
+  tipoid  String?     
   biografia String?
-  imagem String?
+  imagem Bytes?
 }
-
