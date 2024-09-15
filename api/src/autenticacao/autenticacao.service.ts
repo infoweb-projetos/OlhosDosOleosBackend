@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/co
 import { PersistenciaService } from 'src/persistencia/persistencia.service';
 import { JwtService } from '@nestjs/jwt';
 import { TokenDto } from './dto/token.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AutenticacaoService {
@@ -22,9 +23,9 @@ export class AutenticacaoService {
             throw new NotFoundException(`Usuario com o email ou nome de usuario: ${email} não encontrado`);
         }
 
-        const ehSenhaValida = usuario.senha === senha;
+        const ehSenhaValida = await bcrypt.compare(senha, usuario.senha);;
         if (!ehSenhaValida){
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Senha incorreta');
         }
 
         return {

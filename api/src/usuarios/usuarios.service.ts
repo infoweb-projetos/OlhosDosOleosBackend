@@ -1,35 +1,124 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PersistenciaService } from 'src/persistencia/persistencia.service';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsuariosService {
   constructor(private persistencia: PersistenciaService, private jwt: JwtService) { }
 
+  private readonly saltRounds = 10;
   async create(usu: CreateUsuarioDto, arq: Express.Multer.File) {
-    usu.imagem = arq ? arq.buffer : null;
-    const usuario = await this.persistencia.usuario.create({
-      data: {
-        nome: usu.nome,
-        email: usu.email,
-        senha: usu.senha,
-        usuario: usu.usuario,
-        cidade: usu.cidadeid ? { connect: { id: Number(usu.cidadeid) } } : undefined,
-        insta: usu.insta,
-        youtube: usu.youtube,
-        zap: usu.zap,
-        face: usu.face,
-        tipo: usu.tipoid ? { connect: { nome: usu.tipoid } } : undefined,
-        biografia: usu.biografia,
-        imagem: usu.imagem,
-      },
-    });
-    return {
-      estado: 'ok',
-      dados: usuario,
-    };
+    if (!usu.nome) throw new BadRequestException('Preencha o campo do nome');
+    if (!usu.email) throw new BadRequestException('Preencha o campo de email');
+    if (!usu.usuario) throw new BadRequestException('Preencha o campo do nome de usuario');
+    if (!usu.senha) throw new BadRequestException('Preencha o campo da senha');
+
+    if (!usu.email.includes('@')) {
+      throw new BadRequestException('Email inválido');
+    }
+
+    if (usu.cidadeid) {
+      const cidade = await this.persistencia.cidade.findUnique({
+        where: { id: usu.cidadeid },
+      });
+      if (!cidade) {
+        throw new BadRequestException('Cidade inválida');
+      }
+    }
+
+    if (usu.tipoid) {
+      const tipo = await this.persistencia.tipoArtista.findUnique({
+        where: { nome: usu.tipoid },
+      });
+      if (!tipo) {
+        throw new BadRequestException('Cidade invalida');
+      }
+    }
+
+    if (usu.insta && !(/https?:\/\/.+/.test(usu.insta))) {
+      throw new BadRequestException('Link de Instagram inválido');
+    }
+    if (usu.face && !(/https?:\/\/.+/.test(usu.face))) {
+      throw new BadRequestException('Link de Facebook inválido');
+    }
+    if (usu.zap && !(/https?:\/\/.+/.test(usu.zap))) {
+      throw new BadRequestException('Link de WhatsApp inválido');
+    }
+    if (usu.youtube && !(/https?:\/\/.+/.test(usu.youtube))) {
+      throw new BadRequestException('Link de YouTube inválido');
+    }
+
+    if (arq) {
+      if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(arq.mimetype)) {
+        throw new BadRequestException('Arquivo enviado não é uma imagem válida');
+      }
+    }
+
+    if (usu.cor1) {
+      if (usu.cor1.length < 6) {
+        throw new BadRequestException('Cor 1 inválida');
+      }
+    }
+    if (usu.cor2) {
+      if (usu.cor2.length < 6) {
+        throw new BadRequestException('Cor 2 inválida');
+      }
+    }
+    if (usu.cor3) {
+      if (usu.cor1.length < 6) {
+        throw new BadRequestException('Cor 3 inválida');
+      }
+    }
+    if (usu.cor3) {
+      if (usu.cor1.length < 6) {
+        throw new BadRequestException('Cor 4 inválida');
+      }
+    }
+
+    try {
+      if (arq) {
+        usu.imagem = arq.buffer;
+        usu.imagemtipo = arq.mimetype;
+      }
+
+      const senhaProtegida = await bcrypt.hash(usu.senha, this.saltRounds);
+      usu.senha = senhaProtegida;
+      const usuario = await this.persistencia.usuario.create({
+        data: {
+          nome: usu.nome,
+          email: usu.email,
+          senha: usu.senha,
+          usuario: usu.usuario,
+          cidade: usu.cidadeid ? { connect: { id: Number(usu.cidadeid) } } : undefined,
+          insta: usu.insta,
+          youtube: usu.youtube,
+          zap: usu.zap,
+          face: usu.face,
+          tipo: usu.tipoid ? { connect: { nome: usu.tipoid } } : undefined,
+          biografia: usu.biografia,
+          imagem: usu.imagem,
+          imagemtipo: usu.imagemtipo,
+          cor1: usu.cor1,
+          cor2: usu.cor2,
+          cor3: usu.cor3,
+          cor4: usu.cor4
+        },
+      });
+
+      const { senha, ...dadosPublicosUsuario } = usuario;
+
+      return {
+        estado: 'ok',
+        dados: dadosPublicosUsuario,
+      };
+    }
+    catch (error) {
+      console.error('Erro ao criar usuário:', error);
+      throw new BadRequestException('Algo deu errado.');
+    }
   }
 
   async findAll() {
@@ -40,21 +129,43 @@ export class UsuariosService {
   }
 
   async acharUsuarioToken(token: string) {
-    const tokenDescodificado = this.jwt.verify(token);
-    const usuario = await this.persistencia.usuario.findUnique({
-      where: { id: tokenDescodificado.usuario },
-    });
-    if (usuario) {
-      return {
-        estado: 'ok',
-        dados: usuario,
-      };
-    } else {
-      return {
-        estado: 'nok',
-        mensagem: `usuario com ${tokenDescodificado} não existe!`,
-      };
+    try {
+      const tokenDescodificado = this.jwt.verify(token);
+      const usuario = await this.persistencia.usuario.findUnique({
+        where: { id: tokenDescodificado.usuario },
+        include: {
+          cidade: true,
+          estado: true,
+        },
+      });
+
+      if (usuario) {
+        const { senha, ...dadosPublicosUsuario } = usuario;
+
+        let localizacao = "";
+        if (usuario.cidadeid && usuario.estadoid) localizacao = "Brasil, " + usuario.estado?.nome + ", " + usuario.cidade?.nome;
+
+        const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao };
+
+        return {
+          estado: 'ok',
+          dados: usuarioCompleto,
+        };
+      } 
+      else {
+        return {
+          estado: 'nok',
+          mensagem: `usuario com ${tokenDescodificado} não existe!`,
+        };
+      }
     }
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token inválido ou expirado.');
+      }
+      throw new BadRequestException('Erro ao processar a solicitação.');
+    }
+
   }
   async acharUsuarioId(id: number) {
     const usuario = await this.persistencia.usuario.findUnique({
