@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PersistenciaService } from 'src/persistencia/persistencia.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { EditaBannerDto } from './dto/edita-banner-usuario.dto';
 
 @Injectable()
 export class UsuariosService {
@@ -58,22 +59,22 @@ export class UsuariosService {
     }
 
     if (usu.cor1) {
-      if (usu.cor1.length < 6) {
+      if (usu.cor1.length != 6) {
         throw new BadRequestException('Cor 1 inválida');
       }
     }
     if (usu.cor2) {
-      if (usu.cor2.length < 6) {
+      if (usu.cor2.length != 6) {
         throw new BadRequestException('Cor 2 inválida');
       }
     }
     if (usu.cor3) {
-      if (usu.cor1.length < 6) {
+      if (usu.cor1.length != 6) {
         throw new BadRequestException('Cor 3 inválida');
       }
     }
     if (usu.cor3) {
-      if (usu.cor1.length < 6) {
+      if (usu.cor1.length != 6) {
         throw new BadRequestException('Cor 4 inválida');
       }
     }
@@ -151,7 +152,7 @@ export class UsuariosService {
           estado: 'ok',
           dados: usuarioCompleto,
         };
-      } 
+      }
       else {
         return {
           estado: 'nok',
@@ -184,26 +185,189 @@ export class UsuariosService {
     }
   }
 
-  async update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
-    const resultado = await this.persistencia.usuario
-      .update({
-        where: { id: id },
-        data: updateUsuarioDto,
-      })
-      .then((usuario) => {
-        return {
-          estado: 'ok',
-          dados: usuario,
-        };
-      })
-      .catch((error) => {
-        return {
-          estado: 'nok',
-          mensagem: `usuario com ${id} não existe!`,
-        };
+  public validarImagem(file: Express.Multer.File, nome: string) {
+    if (file && !['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.mimetype)) {
+      throw new BadRequestException(`Arquivo enviado para ${nome} não é uma imagem válida`);
+    }
+  };
+  public validarLink(url: string, plataforma: string) {
+    if (url && !(/^https?:\/\/.+/.test(url))) {
+      throw new BadRequestException(`Link de ${plataforma} inválido`);
+    }
+  };
+
+  async atualizar(token: string, usu: UpdateUsuarioDto, foto: Express.Multer.File, banner: Express.Multer.File) {
+    const tokenDescodificado = this.jwt.verify(token);
+    const usuarioAtual = await this.persistencia.usuario.findUnique({
+      where: { id: tokenDescodificado.usuario },
+    });
+    if (!usuarioAtual) throw new NotFoundException('Erro localizando usuario');
+    if (!usu.nome) throw new BadRequestException('Preencha o campo do nome');
+    if (!usu.email) throw new BadRequestException('Preencha o campo de email');
+    if (!usu.usuario) throw new BadRequestException('Preencha o campo do nome de usuario');
+
+    if (!usu.email.includes('@')) {
+      throw new BadRequestException('Email inválido');
+    }
+
+    if (usu.cidadeid) {
+      const cidade = await this.persistencia.cidade.findUnique({
+        where: { id: usu.cidadeid },
       });
-    return resultado;
+      if (!cidade) {
+        throw new BadRequestException('Cidade inválida');
+      }
+    }
+
+    if (usu.tipoid) {
+      const tipo = await this.persistencia.tipoArtista.findUnique({
+        where: { nome: usu.tipoid },
+      });
+      if (!tipo) {
+        throw new BadRequestException('Cidade invalida');
+      }
+    }
+
+    this.validarLink(usu.insta, 'Instagram');
+    this.validarLink(usu.face, 'Facebook');
+    this.validarLink(usu.zap, 'WhatsApp');
+    this.validarLink(usu.youtube, 'YouTube');
+
+    this.validarImagem(foto, 'foto');
+    this.validarImagem(banner, 'banner');
+
+    if (usu.cor1) {
+      if (usu.cor1.length != 6) {
+        throw new BadRequestException('Cor 1 inválida');
+      }
+    }
+    if (usu.cor2) {
+      if (usu.cor2.length != 6) {
+        throw new BadRequestException('Cor 2 inválida');
+      }
+    }
+    if (usu.cor3) {
+      if (usu.cor1.length != 6) {
+        throw new BadRequestException('Cor 3 inválida');
+      }
+    }
+    if (usu.cor3) {
+      if (usu.cor1.length != 6) {
+        throw new BadRequestException('Cor 4 inválida');
+      }
+    }
+    try {
+      if (foto) {
+        usu.imagem = foto.buffer;
+        usu.imagemtipo = foto.mimetype;
+      }
+      if (banner) {
+        usu.banner = banner.buffer;
+        usu.bannertipo = banner.mimetype;
+      }
+
+      if (usu.senha) {
+        const senhaProtegida = await bcrypt.hash(usu.senha, this.saltRounds);
+        usu.senha = senhaProtegida;
+      } else {
+        usu.senha = usuarioAtual.senha;
+      }
+
+
+      const resultado = await this.persistencia.usuario
+        .update({
+          where: { id: tokenDescodificado.usuario },
+          data: {
+            nome: usu.nome,
+            email: usu.email,
+            senha: usu.senha,
+            usuario: usu.usuario,
+            cidade: usu.cidadeid ? { connect: { id: Number(usu.cidadeid) } } : undefined,
+            insta: usu.insta,
+            youtube: usu.youtube,
+            zap: usu.zap,
+            face: usu.face,
+            tipo: usu.tipoid ? { connect: { nome: usu.tipoid } } : undefined,
+            biografia: usu.biografia,
+            imagem: usu.imagem,
+            imagemtipo: usu.imagemtipo,
+            banner: usu.banner,
+            bannertipo: usu.bannertipo,
+            cor1: usu.cor1,
+            cor2: usu.cor2,
+            cor3: usu.cor3,
+            cor4: usu.cor4
+          },
+        })
+        .then((usuario) => {
+          const { senha, ...dadosPublicosUsuario } = usuario;
+          return {
+            estado: 'ok',
+            dados: dadosPublicosUsuario,
+          };
+        })
+        .catch((error) => {
+          console.log(error);
+          return {
+            estado: 'nok',
+            mensagem: `usuario com ${tokenDescodificado.usuario} não existe!`,
+          };
+        });
+      return resultado;
+    }
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token inválido ou expirado.');
+      }
+      console.log(error);
+      throw new BadRequestException('Algo deu errado.');
+    }
+
   }
+
+
+  async editarBanner(token: string, usu: EditaBannerDto, banner: Express.Multer.File) {
+    this.validarImagem(banner, 'banner');
+    try {
+      if (banner) {
+        usu.banner = banner.buffer;
+        usu.bannertipo = banner.mimetype;
+      }
+      const tokenDescodificado = this.jwt.verify(token);
+      const resultado = await this.persistencia.usuario
+        .update({
+          where: { id: tokenDescodificado.usuario },
+          data: {
+            banner: usu.banner,
+            bannertipo: usu.bannertipo,
+          },
+        })
+        .then((usuario) => {
+          const { senha, ...dadosPublicosUsuario } = usuario;
+          return {
+            estado: 'ok',
+            dados: dadosPublicosUsuario,
+          };
+        })
+        .catch((error) => {
+          console.log(error);
+          return {
+            estado: 'nok',
+            mensagem: `usuario com ${tokenDescodificado.usuario} não existe!`,
+          };
+        });
+      return resultado;
+    }
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token inválido ou expirado.');
+      }
+      console.log(error);
+      throw new BadRequestException('Algo deu errado.');
+    }
+
+  }
+
 
   async remove(id: number) {
     const resultado = await this.persistencia.usuario
