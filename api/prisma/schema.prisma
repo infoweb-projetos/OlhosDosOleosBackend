@@ -14,6 +14,7 @@ model Estado {
   id       Int      @id @default(autoincrement()) 
   nome     String   
   cidades  Cidade[] 
+  usuarios Usuario[]    
 }
 
 model Cidade {
@@ -36,7 +37,9 @@ model Usuario {
   senha String  
   usuario String  @unique
   cidade Cidade? @relation(fields: [cidadeid], references: [id]) 
-  cidadeid  Int?    
+  cidadeid  Int?  
+  estado Estado? @relation(fields: [estadoid], references: [id]) 
+  estadoid  Int?  
   insta String?
   youtube String?
   zap String?
@@ -45,4 +48,11 @@ model Usuario {
   tipoid  String?     
   biografia String?
   imagem Bytes?
+  imagemtipo String?
+  banner Bytes?
+  bannertipo String?
+  cor1 String?
+  cor2 String?
+  cor3 String?
+  cor4 String?
 }
