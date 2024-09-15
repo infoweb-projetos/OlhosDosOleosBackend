@@ -11,8 +11,7 @@ async function main() {
         'Artista Digital',
         'Pintor de Aquarela',
         'Quadrinista',
-        'Escultor',
-        'Fotógrafo',
+        'Artista 3D',
         'Ilustrador',
         'Grafiteiro'
     ];
