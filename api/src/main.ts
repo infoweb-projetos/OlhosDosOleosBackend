@@ -8,8 +8,8 @@ async function bootstrap() {
     origin: '*',
   });
   const config = new DocumentBuilder()
-    .setTitle('Infoweb - Upload API')
-    .setDescription('API exemplo de upload de arquivos')
+    .setTitle('ODO - API')
+    .setDescription('API do site')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);

@@ -74,11 +74,12 @@ model Post{
   categoria Categoria @relation(fields: [categoriaid], references: [nome]) 
   categoriaid String     
   titulo String
-  descricao String
-  imagem Bytes? // Imagem da obra finalizada
-  imagemtipo String?
+  descricao String?
+  imagem Bytes // Imagem da obra finalizada
+  imagemtipo String
   processo Processo[] // as multiplas imagens que podem ser adicionadas pra mostrar o processo de criação da obra
   tags PostTag[]
+  sensivel Boolean @default(false)
   rascunho Boolean @default(false)
   excluido Boolean @default(false)
   entrada DateTime @default(now())
