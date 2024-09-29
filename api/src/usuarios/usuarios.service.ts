@@ -21,13 +21,17 @@ export class UsuariosService {
       throw new BadRequestException('Email inválido');
     }
 
+    const localizacao = {cidadeid: Number(undefined), estadoid: Number(undefined), usuarioid: Number(undefined)};
     if (usu.cidadeid) {
       const cidade = await this.persistencia.cidade.findUnique({
-        where: { id: usu.cidadeid },
+        where: { id: Number(usu.cidadeid) },
       });
       if (!cidade) {
+        console.log(usu.cidadeid);
         throw new BadRequestException('Cidade inválida');
       }
+      localizacao.cidadeid = cidade.id;
+      localizacao.estadoid = cidade.estadoid;
     }
 
     if (usu.tipoid) {
@@ -35,7 +39,7 @@ export class UsuariosService {
         where: { nome: usu.tipoid },
       });
       if (!tipo) {
-        throw new BadRequestException('Cidade invalida');
+        throw new BadRequestException('Tipo de artista invalido');
       }
     }
 
@@ -93,7 +97,7 @@ export class UsuariosService {
           email: usu.email,
           senha: usu.senha,
           usuario: usu.usuario,
-          cidade: usu.cidadeid ? { connect: { id: Number(usu.cidadeid) } } : undefined,
+          localizacao: undefined,
           insta: usu.insta,
           youtube: usu.youtube,
           zap: usu.zap,
@@ -109,7 +113,29 @@ export class UsuariosService {
         },
       });
 
-      const { senha, ...dadosPublicosUsuario } = usuario;
+      let usuarioFinal = usuario;
+      if (localizacao.cidadeid && localizacao.estadoid){
+        const localizacaoNoBD = await this.persistencia.localizacao.create({
+          data: {
+            cidade:  { connect: { id: localizacao.cidadeid } }, 
+            estado: { connect: { id: localizacao.estadoid } }, 
+            usuario: { connect: { id: usuario.id } }, 
+
+          }
+        });
+        console.log(localizacaoNoBD.id);
+
+        usuarioFinal = await this.persistencia.usuario.update({
+          where: { id: usuario.id },
+          data:{
+            localizacao:  { connect: { id: localizacaoNoBD.id } }, 
+            localizacaoid:  localizacaoNoBD.id , 
+          }
+        });
+        console.log(usuarioFinal)
+      }
+
+      const { senha, ...dadosPublicosUsuario } = usuarioFinal;
 
       return {
         estado: 'ok',
@@ -118,7 +144,7 @@ export class UsuariosService {
     }
     catch (error) {
       console.error('Erro ao criar usuário:', error);
-      throw new BadRequestException('Algo deu errado.');
+      throw new BadRequestException('Algo deu errado:' + error);
     }
   }
 
@@ -135,8 +161,12 @@ export class UsuariosService {
       const usuario = await this.persistencia.usuario.findUnique({
         where: { id: tokenDescodificado.usuario },
         include: {
-          cidade: true,
-          estado: true,
+          localizacao: {
+            include: {
+              estado: true,
+              cidade: true,
+            }
+          },
         },
       });
 
@@ -144,7 +174,8 @@ export class UsuariosService {
         const { senha, ...dadosPublicosUsuario } = usuario;
 
         let localizacao = "";
-        if (usuario.cidadeid && usuario.estadoid) localizacao = "Brasil, " + usuario.estado?.nome + ", " + usuario.cidade?.nome;
+        if (usuario.localizacao?.estadoid && usuario.localizacao?.estadoid) 
+          localizacao = "Brasil, " + usuario.localizacao?.estado?.nome + ", " + usuario.localizacao?.cidade?.nome;
 
         const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao };
 
@@ -210,6 +241,7 @@ export class UsuariosService {
       throw new BadRequestException('Email inválido');
     }
 
+    const localizacao = {cidadeid: Number(undefined), estadoid:Number(undefined), usuarioid:Number(undefined)};
     if (usu.cidadeid) {
       const cidade = await this.persistencia.cidade.findUnique({
         where: { id: usu.cidadeid },
@@ -217,6 +249,8 @@ export class UsuariosService {
       if (!cidade) {
         throw new BadRequestException('Cidade inválida');
       }
+      localizacao.cidadeid = cidade.id;
+      localizacao.estadoid = cidade.estadoid;
     }
 
     if (usu.tipoid) {
@@ -273,7 +307,23 @@ export class UsuariosService {
         usu.senha = usuarioAtual.senha;
       }
 
-
+      let localizacaoBD = await this.persistencia.localizacao.findUnique({
+        where: { id: tokenDescodificado.usuario }, 
+      });
+      if(localizacaoBD.cidadeid != localizacao.cidadeid || localizacaoBD.estadoid != localizacao.estadoid ){
+        localizacaoBD = await this.persistencia.localizacao
+        .update({
+            where: { 
+              id: tokenDescodificado.usuario, 
+            },
+            data: {
+              cidadeid: localizacao.cidadeid,
+              estadoid: localizacao.estadoid,
+            }
+        });
+  
+      } 
+      usu.localizacaoid - localizacaoBD.id;
       const resultado = await this.persistencia.usuario
         .update({
           where: { id: tokenDescodificado.usuario },
@@ -282,11 +332,11 @@ export class UsuariosService {
             email: usu.email,
             senha: usu.senha,
             usuario: usu.usuario,
-            cidade: usu.cidadeid ? { connect: { id: Number(usu.cidadeid) } } : undefined,
             insta: usu.insta,
             youtube: usu.youtube,
             zap: usu.zap,
             face: usu.face,
+            localizacao: { connect: { id: usu.localizacaoid } },
             tipo: usu.tipoid ? { connect: { nome: usu.tipoid } } : undefined,
             biografia: usu.biografia,
             imagem: usu.imagem,
@@ -300,6 +350,7 @@ export class UsuariosService {
           },
         })
         .then((usuario) => {
+          
           const { senha, ...dadosPublicosUsuario } = usuario;
           return {
             estado: 'ok',
@@ -371,11 +422,12 @@ export class UsuariosService {
 
   async remove(id: number) {
     const resultado = await this.persistencia.usuario
-      .delete({ where: { id } })
+      .delete({ where: { id: id } })
       .then((usuario) => {
         return { estado: 'ok', dados: usuario };
       })
       .catch((error) => {
+        console.log(error)
         return {
           estado: 'nok',
           mensagem: `usuario com ${id} não existe!`,

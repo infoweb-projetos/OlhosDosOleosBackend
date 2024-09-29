@@ -10,36 +10,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Estado {
-  id       Int      @id @default(autoincrement()) 
-  nome     String   
-  cidades  Cidade[] 
-  usuarios Usuario[]    
-}
-
-model Cidade {
-  id       Int      @id @default(autoincrement())
-  nome     String
-  estado   Estado   @relation(fields: [estadoid], references: [id]) 
-  estadoid Int  
-  usuarios Usuario[]     
-}
-
 model TipoArtista {
   nome String @id
   usuarios Usuario[]
 }
 
+model Localizacao {
+  id Int @id @default(autoincrement()) 
+  usuarioid Int @unique
+  cidadeid Int  
+  estadoid Int    
+  cidade Cidade @relation(fields: [cidadeid], references: [id])    
+  estado Estado @relation(fields: [estadoid], references: [id])    
+  usuario Usuario @relation(fields: [usuarioid], references: [id]) 
+}
+
+model Estado {
+  id Int @id @default(autoincrement()) 
+  nome String   
+  cidades Cidade[] 
+  localizacao Localizacao[] 
+}
+
+model Cidade {
+  id Int @id @default(autoincrement())
+  nome String
+  estado Estado @relation(fields: [estadoid], references: [id]) 
+  estadoid Int  
+  localizacao Localizacao[] 
+}
+
 model Usuario {
-  id    Int     @id @default(autoincrement())
+  id Int @id @default(autoincrement())
   nome  String
   email String  @unique
   senha String  
   usuario String  @unique
-  cidade Cidade? @relation(fields: [cidadeid], references: [id]) 
-  cidadeid  Int?  
-  estado Estado? @relation(fields: [estadoid], references: [id]) 
-  estadoid  Int?  
+  localizacao Localizacao?   
+  localizacaoid  Int?
   insta String?
   youtube String?
   zap String?
@@ -55,4 +63,49 @@ model Usuario {
   cor2 String?
   cor3 String?
   cor4 String?
+  posts Post[]
+  entrada DateTime @default(now())
+}
+
+model Post{
+  id Int @id @default(autoincrement())
+  usuario Usuario @relation(fields: [usuarioid], references: [id]) 
+  usuarioid Int 
+  categoria Categoria @relation(fields: [categoriaid], references: [nome]) 
+  categoriaid String     
+  titulo String
+  descricao String
+  imagem Bytes? // Imagem da obra finalizada
+  imagemtipo String?
+  processo Processo[] // as multiplas imagens que podem ser adicionadas pra mostrar o processo de criação da obra
+  tags PostTag[]
+  rascunho Boolean @default(false)
+  excluido Boolean @default(false)
+  entrada DateTime @default(now())
+}
+
+model Processo{
+  id Int @id @default(autoincrement())
+  postid Int
+  post Post @relation(fields: [postid], references: [id]) 
+  imagem Bytes?
+  imagemtipo String?
+}
+
+model Categoria {
+  nome String @id
+  posts Post[]
+}
+
+model Tag {
+  nome String @id
+  posts PostTag[]
+}
+
+model PostTag {
+  postid Int 
+  tagid String 
+  tag Tag @relation(fields: [tagid], references: [nome], onDelete: Cascade)   
+  post Post @relation(fields: [postid], references: [id], onDelete: Cascade)     
+  @@id([postid, tagid])
 }

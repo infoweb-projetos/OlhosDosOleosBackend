@@ -23,7 +23,7 @@ POST http://localhost:3000/autenticacao/login
 Content-type: application/json
 
 {
-    "email": "thiago@gmail.com",
+    "email": "Gon2",
     "senha": "123"
 }
 
@@ -49,12 +49,11 @@ GET http://localhost:3000/usuarios/outroperfil/1
 DELETE http://localhost:3000/usuarios/apagar/2
 
 ### PATCH atualiza o usuario de id 1
-PATCH http://localhost:3000/usuarios/atualizar/2
+PATCH http://localhost:3000/usuarios/atualizar/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoyMiwiaWF0IjoxNzI3NjQ0MTk2LCJleHAiOjE3Mjc2NDQ0OTZ9.La5a1Bh4y1AWabzBSi2mpFNid202WHPhbWVYd_CtBDc
 content-type: application/json
-
 {
-   "nome": "Clark Kent",
-   "email": "clarkent@gmail.com",
-   "senha": "123"
+   "cidadeid": 212,
+   "estadoid": 55,
 }
 

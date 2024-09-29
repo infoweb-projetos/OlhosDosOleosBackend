@@ -6,6 +6,7 @@ async function main() {
     await prisma.cidade.deleteMany({});
     await prisma.estado.deleteMany({});
     await prisma.tipoArtista.deleteMany({});
+    await prisma.categoria.deleteMany({});
 
     const tiposArtista = [
         'Artista Digital',
@@ -19,6 +20,22 @@ async function main() {
     for (const tipo of tiposArtista) {
         await prisma.tipoArtista.create({
             data: { nome: tipo },
+        });
+    }
+
+    const categoriasPost = [
+        'Arte Digital',
+        'Aquarela',
+        'Quadrinhos',
+        '3D',
+        'Grafite',
+        'Surrealista',
+        'Realista'
+    ];
+
+    for (const categoria of categoriasPost) {
+        await prisma.categoria.create({
+            data: { nome: categoria },
         });
     }
 

@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { LocalizacaoDto } from "src/modelos/localizacao.dto";
 
 export class CreateUsuarioDto {
     @ApiProperty()
@@ -18,6 +19,10 @@ export class CreateUsuarioDto {
 
     @ApiProperty({ required: false, type: Number})
     estadoid?: number;
+
+    localizacaoid?: number;
+
+    localizacao?: LocalizacaoDto;
 
     @ApiProperty({ required: false })
     insta?: string;
@@ -54,4 +59,6 @@ export class CreateUsuarioDto {
 
     @ApiProperty({ required: false })
     cor4?: string;
+
+    entrada?: Date; 
 }

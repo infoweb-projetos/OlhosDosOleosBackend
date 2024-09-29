@@ -1,6 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUsuarioDto } from './create-usuario.dto';
 import { ApiProperty } from "@nestjs/swagger";
+import { LocalizacaoDto } from "src/modelos/localizacao.dto";
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
     @ApiProperty()
@@ -20,6 +21,8 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
 
     @ApiProperty({ required: false, type: Number})
     estadoid?: number;
+
+    localizacao?: LocalizacaoDto;
 
     @ApiProperty({ required: false })
     insta?: string;
