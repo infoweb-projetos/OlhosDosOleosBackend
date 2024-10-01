@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { AutenticacaoService } from './autenticacao.service';
@@ -14,11 +14,14 @@ export class AutenticacaoController {
     return this.autenticacaoService.login(login.email, login.senha)
   }
   @ApiTags('Autenticação')
-  @Get('teste')
+  @Get('verificatoken')
   @UseGuards(JwtAuthGuard)
-  teste() {
-    return {
-      status: 'ok',
+  teste(@Req() req) {
+    const authHeader = req.headers['authorization']; 
+    if (authHeader) {
+      const token = authHeader.split(' ')[1]; 
+      return this.autenticacaoService.verificaToken(token)
     }
+    return { message: 'Token não encontrado' };
   }
 }

@@ -11,7 +11,7 @@ export class CriarPost {
     imagemtipo?: string;
 
     @ApiProperty()
-    titulo?: string;
+    titulo: string;
 
     @ApiProperty()
     descricao?: string;
@@ -29,11 +29,11 @@ export class CriarPost {
     entrada?: Date;
 
     @ApiProperty()
-    categoriaid: number;
+    categoriaid: string;
 
     @ApiProperty()
     usuarioid: number;
 
     @ApiProperty()
-    tags: string[];
+    tags?: string[];
 }

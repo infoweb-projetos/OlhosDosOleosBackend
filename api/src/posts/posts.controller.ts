@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Req, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { Body, Controller, Get, Post, Req, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { CriarPost } from './dto/post.dto';
@@ -10,18 +10,28 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @ApiTags('Post')
-  @Get('criar')
-  @UseInterceptors(FileInterceptor('imagem'))
-  @UseInterceptors(FilesInterceptor('processo'))
+  @Post('criar')
+  @UseInterceptors(AnyFilesInterceptor())
   @ApiConsumes('multipart/form-data')
   @UseGuards(JwtAuthGuard)
-  findOne(@Req() req: Request, @Body() criarPost: CriarPost, @UploadedFile() imagem: Express.Multer.File, @UploadedFiles() processo: Array<Express.Multer.File>) {
+  Criar(@Req() req: Request, @Body() criarPost: CriarPost, @UploadedFiles() arquivos: Array<Express.Multer.File> | undefined) {
+    const imagem = arquivos.find(arq => arq.fieldname === 'imagem');
+    const arqprocesso = arquivos.filter(arq => arq.fieldname === 'processo');
+    console.log('criarPost:', criarPost);
+    console.log('imagem:', imagem);
+    console.log('processo:', arqprocesso);
     const authHeader = req.headers['authorization']; 
     if (authHeader) {
       const token = authHeader.split(' ')[1]; 
-      return this.postsService.criar(token, criarPost, imagem, processo)
+      return this.postsService.criar(token, criarPost, imagem, arqprocesso)
     }
     return { message: 'Token não encontrado' };
+  }
+
+  @ApiTags('Post')
+  @Get('listar')
+  listar() {
+    return this.postsService.listar();
   }
 
 }
