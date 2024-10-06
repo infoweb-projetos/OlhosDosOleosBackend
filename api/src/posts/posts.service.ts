@@ -18,8 +18,38 @@ export class PostsService {
         include:{
           usuario: true,
         },
+        orderBy:{
+          entrada: "desc",
+        },
       }),
     };
+  }
+
+  async meus(token:string) {
+    try {
+      const tokenDescodificado = this.jwt.verify(token);
+      return {
+        estado: 'ok',
+        dados: await this.persistencia.post.findMany({
+          where: {
+            usuarioid: tokenDescodificado.usuario,
+          },
+          orderBy:{
+            entrada: "desc",
+          },
+          include:{
+            usuario: true,
+          },
+        }),
+      };
+    }
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token inválido ou expirado.');
+      }
+      throw new BadRequestException('Erro ao processar a solicitação.');
+    }
+    
   }
 
   async criar(token: string, post: CriarPost, imagem: Express.Multer.File, processo: Array<Express.Multer.File> | undefined) {
@@ -55,7 +85,6 @@ export class PostsService {
         }
       }
 
-      console.log('1');
       try {
         if (imagem) {
           post.imagem = imagem.buffer;
@@ -71,7 +100,7 @@ export class PostsService {
             imagemtipo: post.imagemtipo,
             rascunho: post.rascunho ? this.stringParaBooleano(post.rascunho) : false,
             sensivel: post.sensivel ? this.stringParaBooleano(post.sensivel) : false,
-            descricao: post.descricao,
+            descricao: post.descricao ? post.descricao : null,
           },
         });
         console.log(postCriado);

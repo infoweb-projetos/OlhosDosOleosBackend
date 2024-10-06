@@ -34,4 +34,16 @@ export class PostsController {
     return this.postsService.listar();
   }
 
+  @ApiTags('Post')
+  @Get('meus')
+  @UseGuards(JwtAuthGuard)
+  meus(@Req() req: Request) {
+    const authHeader = req.headers['authorization']; 
+    if (authHeader) {
+      const token = authHeader.split(' ')[1]; 
+      return this.postsService.meus(token);
+    }
+    return { message: 'Token não encontrado' };
+  }
+
 }

@@ -20,15 +20,15 @@ export class UsuariosController {
   }
 
   @ApiTags('Usuario')
-  @Get('listar')
-  findAll() {
-    return this.usuariosService.findAll();
+  @Get('ultimos')
+  ultimosCemUsurios() {
+    return this.usuariosService.ultimosCemUsurios();
   }
 
   @ApiTags('Usuario')
   @Get('perfil')
   @UseGuards(JwtAuthGuard)
-  findOne(@Req() req: Request) {
+  acharUsuarioToken(@Req() req: Request) {
     const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
     if (authHeader) {
       const token = authHeader.split(' ')[1]; // Divide "Bearer <token>"
@@ -65,7 +65,7 @@ export class UsuariosController {
     { name: 'banner', maxCount: 1 }
   ]))
   @ApiConsumes('multipart/form-data')
-  update(@Req() req: Request, @Body() updateUsuarioDto: UpdateUsuarioDto, @UploadedFiles() files: { imagem?: Express.Multer.File[], banner?: Express.Multer.File[] }) {
+  atualizar(@Req() req: Request, @Body() updateUsuarioDto: UpdateUsuarioDto, @UploadedFiles() files: { imagem?: Express.Multer.File[], banner?: Express.Multer.File[] }) {
     const authHeader = req.headers['authorization'];
     if (authHeader) {
       const token = authHeader.split(' ')[1];

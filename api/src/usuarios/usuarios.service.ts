@@ -148,10 +148,15 @@ export class UsuariosService {
     }
   }
 
-  async findAll() {
+  async ultimosCemUsurios() {
     return {
       estado: 'ok',
-      dados: await this.persistencia.usuario.findMany({}),
+      dados: await this.persistencia.usuario.findMany({
+        take: 100,
+        orderBy:{
+          entrada: "asc",
+        }
+      }),
     };
   }
 
