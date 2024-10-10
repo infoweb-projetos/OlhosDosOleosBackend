@@ -38,6 +38,10 @@ export class AutenticacaoService {
             const usuario = await this.persistencia.usuario.findUnique({
                 where: { id: tokenDescodificado.usuario },
             });
+            return {
+                estado: 'ok',
+                token: tokenDescodificado,
+            }
         }
         catch (error) {
             if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {

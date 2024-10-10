@@ -15,6 +15,9 @@ export class PostsService {
     return {
       estado: 'ok',
       dados: await this.persistencia.post.findMany({
+        where:{
+          rascunho: false,
+        },
         include:{
           usuario: true,
         },
@@ -23,6 +26,30 @@ export class PostsService {
         },
       }),
     };
+  }
+
+  async listarPostUsuario(id : number) {
+    return {
+      estado: 'ok',
+      dados: await this.persistencia.post.findMany({
+        where: {
+          usuarioid: id,
+          rascunho: false,
+        },
+        include:{
+          usuario: true,
+        },
+        orderBy:{
+          entrada: "desc",
+        },
+      }),
+    };
+  }
+  public ehMeuPerfil(token : string, id : number) : boolean{
+    if(!token) return false;
+    const tokenDescodificado = this.jwt.verify(token);
+    if (tokenDescodificado.usuario == id) return true;
+    return false;
   }
 
   async meus(token:string) {

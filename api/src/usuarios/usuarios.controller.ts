@@ -39,8 +39,34 @@ export class UsuariosController {
 
   @ApiTags('Usuario')
   @Get('outroperfil/:id')
-  acharUsuario(@Param('id') id: string) {
+  acharUsuario(@Req() req: Request, @Param('id') id: string) {
+    const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      const ehMeuPerfil = this.usuariosService.ehMeuPerfil(token, +id);
+      if (ehMeuPerfil) return this.usuariosService.acharUsuarioToken(token);
+    }
     return this.usuariosService.acharUsuarioId(+id);
+  }
+
+  @ApiTags('Usuario')
+  @Get('soueu/:id')
+  verificarUsurioLogado(@Req() req: Request, @Param('id') id: string) {
+    const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      const ehMeuPerfil = this.usuariosService.ehMeuPerfil(token, +id);
+      console.log(ehMeuPerfil);
+      return{
+        estado: 'ok',
+        ehMeuPerfil: ehMeuPerfil,
+      }
+    }
+    return{
+      estado: 'ok',
+      ehMeuPerfil: false,
+    }
+   
   }
 
   @ApiTags('Usuario')

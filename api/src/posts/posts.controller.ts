@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
@@ -45,5 +45,20 @@ export class PostsController {
     }
     return { message: 'Token não encontrado' };
   }
+
+  @ApiTags('Post')
+  @Get('usuario/:id')
+  listarPostUsuario(@Req() req: Request, @Param('id') id: string) {
+    const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      const ehMeuPerfil = this.postsService.ehMeuPerfil(token, +id);
+      if (ehMeuPerfil) return this.postsService.meus(token);
+    }
+    return this.postsService.listarPostUsuario(Number(id));
+  }
+
+  
+  
 
 }

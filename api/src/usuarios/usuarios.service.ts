@@ -207,11 +207,27 @@ export class UsuariosService {
   async acharUsuarioId(id: number) {
     const usuario = await this.persistencia.usuario.findUnique({
       where: { id: id },
+      include: {
+        localizacao: {
+          include: {
+            estado: true,
+            cidade: true,
+          }
+        },
+      },
     });
     if (usuario) {
+      const { senha, ...dadosPublicosUsuario } = usuario;
+
+      let localizacao = "";
+      if (usuario.localizacao?.estadoid && usuario.localizacao?.estadoid) 
+        localizacao = "Brasil, " + usuario.localizacao?.estado?.nome + ", " + usuario.localizacao?.cidade?.nome;
+
+      const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao };
+
       return {
         estado: 'ok',
-        dados: usuario,
+        dados: usuarioCompleto,
       };
     } else {
       return {
@@ -219,6 +235,12 @@ export class UsuariosService {
         mensagem: `usuario com ${id} não existe!`,
       };
     }
+  }
+  public ehMeuPerfil(token : string, id : number) : boolean{
+    if(!token) return false;
+    const tokenDescodificado = this.jwt.verify(token);
+    if (tokenDescodificado.usuario == id) return true;
+    return false;
   }
 
   public validarImagem(file: Express.Multer.File, nome: string) {
