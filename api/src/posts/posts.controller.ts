@@ -49,13 +49,27 @@ export class PostsController {
   @ApiTags('Post')
   @Get('usuario/:id')
   listarPostUsuario(@Req() req: Request, @Param('id') id: string) {
-    const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
-    if (authHeader) {
-      const token = authHeader.split(' ')[1];
-      const ehMeuPerfil = this.postsService.ehMeuPerfil(token, +id);
-      if (ehMeuPerfil) return this.postsService.meus(token);
+    try{
+      const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
+      if (authHeader) {
+        const token = authHeader.split(' ')[1];
+        const ehMeuPerfil = this.postsService.ehMeuPerfil(token, +id);
+        if (ehMeuPerfil) return this.postsService.meus(token);
+      }
+      return this.postsService.listarPostUsuario(Number(id));
     }
-    return this.postsService.listarPostUsuario(Number(id));
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        return{
+          message:'Token inválido ou expirado.',
+        };
+      }
+      return{
+        message:'Algo deu errado.',
+      };
+    }
+
+    
   }
 
   

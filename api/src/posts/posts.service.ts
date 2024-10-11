@@ -45,11 +45,21 @@ export class PostsService {
       }),
     };
   }
+  
   public ehMeuPerfil(token : string, id : number) : boolean{
-    if(!token) return false;
-    const tokenDescodificado = this.jwt.verify(token);
-    if (tokenDescodificado.usuario == id) return true;
-    return false;
+    try{
+      if(!token) return false;
+      const tokenDescodificado = this.jwt.verify(token);
+      if (tokenDescodificado.usuario == id) return true;
+      return false;
+    }
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token inválido ou expirado.');
+      }
+      console.log(error);
+      throw new BadRequestException('Algo deu errado.');
+    }
   }
 
   async meus(token:string) {

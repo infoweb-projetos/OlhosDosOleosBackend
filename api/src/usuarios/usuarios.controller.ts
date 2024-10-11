@@ -40,33 +40,56 @@ export class UsuariosController {
   @ApiTags('Usuario')
   @Get('outroperfil/:id')
   acharUsuario(@Req() req: Request, @Param('id') id: string) {
-    const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
-    if (authHeader) {
-      const token = authHeader.split(' ')[1];
-      const ehMeuPerfil = this.usuariosService.ehMeuPerfil(token, +id);
-      if (ehMeuPerfil) return this.usuariosService.acharUsuarioToken(token);
+    try{
+      const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
+      if (authHeader) {
+        const token = authHeader.split(' ')[1];
+        const ehMeuPerfil = this.usuariosService.ehMeuPerfil(token, +id);
+        if (ehMeuPerfil) return this.usuariosService.acharUsuarioToken(token);
+      }
+      return this.usuariosService.acharUsuarioId(+id);
     }
-    return this.usuariosService.acharUsuarioId(+id);
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        return{
+          message:'Token inválido ou expirado.',
+        };
+      }
+      return{
+        message:'Algo deu errado.',
+      };
+    }
   }
 
   @ApiTags('Usuario')
   @Get('soueu/:id')
   verificarUsurioLogado(@Req() req: Request, @Param('id') id: string) {
-    const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
-    if (authHeader) {
-      const token = authHeader.split(' ')[1];
-      const ehMeuPerfil = this.usuariosService.ehMeuPerfil(token, +id);
-      console.log(ehMeuPerfil);
+    try{
+      const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
+      if (authHeader) {
+        const token = authHeader.split(' ')[1];
+        const ehMeuPerfil = this.usuariosService.ehMeuPerfil(token, +id);
+        console.log(ehMeuPerfil);
+        return{
+          estado: 'ok',
+          ehMeuPerfil: ehMeuPerfil,
+        }
+      }
       return{
         estado: 'ok',
-        ehMeuPerfil: ehMeuPerfil,
+        ehMeuPerfil: false,
       }
     }
-    return{
-      estado: 'ok',
-      ehMeuPerfil: false,
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        return{
+          message:'Token inválido ou expirado.',
+        };
+      }
+      return{
+        message:'Algo deu errado.',
+      };
     }
-   
   }
 
   @ApiTags('Usuario')
@@ -80,7 +103,6 @@ export class UsuariosController {
       return this.usuariosService.editarBanner(token, editaBannerDto, arq);
     }
     return { message: 'Token não encontrado' };
-
   }
 
   @ApiTags('Usuario')
