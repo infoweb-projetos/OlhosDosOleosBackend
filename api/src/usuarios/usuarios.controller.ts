@@ -69,7 +69,7 @@ export class UsuariosController {
       if (authHeader) {
         const token = authHeader.split(' ')[1];
         const ehMeuPerfil = this.usuariosService.ehMeuPerfil(token, +id);
-        console.log(ehMeuPerfil);
+        console.log("Valor" + ehMeuPerfil);
         return{
           estado: 'ok',
           ehMeuPerfil: ehMeuPerfil,
@@ -84,10 +84,12 @@ export class UsuariosController {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
         return{
           message:'Token inválido ou expirado.',
+          ehMeuPerfil: false,
         };
       }
       return{
         message:'Algo deu errado.',
+        ehMeuPerfil: false,
       };
     }
   }
