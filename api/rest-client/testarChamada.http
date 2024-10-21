@@ -57,3 +57,5 @@ content-type: application/json
    "estadoid": 55,
 }
 
+###
+GET https://olhos-dos-oleos-backend.vercel.app/posts/listar
