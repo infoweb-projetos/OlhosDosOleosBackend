@@ -58,4 +58,4 @@ content-type: application/json
 }
 
 ###
-GET https://olhos-dos-oleos-backend.vercel.app/posts/listar
+GET https://olhosdosoleosbackend.railway.internal/posts/listar
