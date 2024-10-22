@@ -58,4 +58,4 @@ content-type: application/json
 }
 
 ###
-GET https://olhosdosoleosbackend.railway.internal/posts/listar
+GET https://olhosdosoleosbackend-production.up.railway.app/posts/listar
