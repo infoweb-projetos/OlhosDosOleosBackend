@@ -1,21 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { CidadeDto } from "src/cidade/dto/cidade.dto";
+import { EstadoDto } from "src/estado/dto/estado.dto";
 import { CreateUsuarioDto } from "src/usuarios/dto/create-usuario.dto";
-
-export class CidadeDto {
-    @ApiProperty()
-    id: number;
-    @ApiProperty()
-    nome: string;
-
-    estado?: EstadoDto;
-}
-
-export class EstadoDto {
-    @ApiProperty()
-    id: number;
-    @ApiProperty()
-    nome: string;
-}
 
 export class LocalizacaoDto {
     @ApiProperty()
