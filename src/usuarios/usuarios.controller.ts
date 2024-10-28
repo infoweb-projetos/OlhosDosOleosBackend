@@ -121,6 +121,9 @@ export class UsuariosController {
       const token = authHeader.split(' ')[1];
       const imagem = files.imagem ? files.imagem[0] : null;
       const banner = files.banner ? files.banner[0] : null;
+      console.log(updateUsuarioDto);
+      console.log(imagem);
+      console.log(banner)
       return this.usuariosService.atualizar(token, updateUsuarioDto, imagem, banner);
     }
     return { message: 'Token não encontrado' };

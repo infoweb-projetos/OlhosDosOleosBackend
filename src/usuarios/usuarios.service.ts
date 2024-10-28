@@ -179,10 +179,10 @@ export class UsuariosService {
         const { senha, ...dadosPublicosUsuario } = usuario;
 
         let localizacao = "";
-        if (usuario.localizacao?.estadoid && usuario.localizacao?.estadoid) 
+        if (usuario.localizacao?.estadoid && usuario.localizacao?.cidadeid) 
           localizacao = "Brasil, " + usuario.localizacao?.estado?.nome + ", " + usuario.localizacao?.cidade?.nome;
 
-        const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao };
+        const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao, estadoid:  usuario.localizacao?.estadoid, cidadeid: usuario.localizacao?.cidadeid};
 
         return {
           estado: 'ok',
@@ -220,7 +220,7 @@ export class UsuariosService {
       const { senha, ...dadosPublicosUsuario } = usuario;
 
       let localizacao = "";
-      if (usuario.localizacao?.estadoid && usuario.localizacao?.estadoid) 
+      if (usuario.localizacao?.estadoid && usuario.localizacao?.cidadeid) 
         localizacao = "Brasil, " + usuario.localizacao?.estado?.nome + ", " + usuario.localizacao?.cidade?.nome;
 
       const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao };
