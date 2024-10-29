@@ -4,17 +4,17 @@ import { ApiProperty } from "@nestjs/swagger";
 import { LocalizacaoDto } from "src/modelos/localizacao.dto";
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
-    @ApiProperty()
-    nome: string;
+    @ApiProperty({ required: false })
+    nome?: string;
 
-    @ApiProperty()
-    email: string;
+    @ApiProperty({ required: false })
+    email?: string;
 
-    @ApiProperty()
-    senha: string;
+    @ApiProperty({ required: false })
+    senha?: string;
 
-    @ApiProperty()
-    usuario: string;
+    @ApiProperty({ required: false })
+    usuario?: string;
 
     @ApiProperty({ required: false, type: Number})
     cidadeid?: number;

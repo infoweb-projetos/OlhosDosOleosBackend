@@ -98,6 +98,7 @@ export class UsuariosController {
   @Patch('banner')
   @UseInterceptors(FileInterceptor('banner'))
   @ApiConsumes('multipart/form-data')
+  @UseGuards(JwtAuthGuard)
   editarBanner(@Req() req: Request, @Body() editaBannerDto: EditaBannerDto, @UploadedFile() arq: Express.Multer.File) {
     const authHeader = req.headers['authorization'];
     if (authHeader) {
@@ -106,6 +107,21 @@ export class UsuariosController {
     }
     return { message: 'Token não encontrado' };
   }
+
+  @ApiTags('Usuario')
+  @Patch('removerbanner')
+  @UseGuards(JwtAuthGuard)
+  removerBanner(@Req() req: Request) {
+    const authHeader = req.headers['authorization'];
+    console.log("Controlador " + authHeader);
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      console.log("token auth " + token);
+      return this.usuariosService.removerBanner(token);
+    }
+    return { message: 'Token não encontrado' };
+  }
+
 
   @ApiTags('Usuario')
   @Patch('atualizar')
@@ -121,9 +137,6 @@ export class UsuariosController {
       const token = authHeader.split(' ')[1];
       const imagem = files.imagem ? files.imagem[0] : null;
       const banner = files.banner ? files.banner[0] : null;
-      console.log(updateUsuarioDto);
-      console.log(imagem);
-      console.log(banner)
       return this.usuariosService.atualizar(token, updateUsuarioDto, imagem, banner);
     }
     return { message: 'Token não encontrado' };

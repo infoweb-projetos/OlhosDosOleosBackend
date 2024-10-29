@@ -21,7 +21,7 @@ export class UsuariosService {
       throw new BadRequestException('Email inválido');
     }
 
-    const localizacao = {cidadeid: Number(undefined), estadoid: Number(undefined), usuarioid: Number(undefined)};
+    const localizacao = { cidadeid: Number(undefined), estadoid: Number(undefined), usuarioid: Number(undefined) };
     if (usu.cidadeid) {
       const cidade = await this.persistencia.cidade.findUnique({
         where: { id: Number(usu.cidadeid) },
@@ -114,12 +114,12 @@ export class UsuariosService {
       });
 
       let usuarioFinal = usuario;
-      if (localizacao.cidadeid && localizacao.estadoid){
+      if (localizacao.cidadeid && localizacao.estadoid) {
         const localizacaoNoBD = await this.persistencia.localizacao.create({
           data: {
-            cidade:  { connect: { id: localizacao.cidadeid } }, 
-            estado: { connect: { id: localizacao.estadoid } }, 
-            usuario: { connect: { id: usuario.id } }, 
+            cidade: { connect: { id: localizacao.cidadeid } },
+            estado: { connect: { id: localizacao.estadoid } },
+            usuario: { connect: { id: usuario.id } },
 
           }
         });
@@ -127,9 +127,9 @@ export class UsuariosService {
 
         usuarioFinal = await this.persistencia.usuario.update({
           where: { id: usuario.id },
-          data:{
-            localizacao:  { connect: { id: localizacaoNoBD.id } }, 
-            localizacaoid:  localizacaoNoBD.id , 
+          data: {
+            localizacao: { connect: { id: localizacaoNoBD.id } },
+            localizacaoid: localizacaoNoBD.id,
           }
         });
         console.log(usuarioFinal)
@@ -153,7 +153,7 @@ export class UsuariosService {
       estado: 'ok',
       dados: await this.persistencia.usuario.findMany({
         take: 100,
-        orderBy:{
+        orderBy: {
           entrada: "asc",
         }
       }),
@@ -179,10 +179,10 @@ export class UsuariosService {
         const { senha, ...dadosPublicosUsuario } = usuario;
 
         let localizacao = "";
-        if (usuario.localizacao?.estadoid && usuario.localizacao?.cidadeid) 
+        if (usuario.localizacao?.estadoid && usuario.localizacao?.cidadeid)
           localizacao = "Brasil, " + usuario.localizacao?.estado?.nome + ", " + usuario.localizacao?.cidade?.nome;
 
-        const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao, estadoid:  usuario.localizacao?.estadoid, cidadeid: usuario.localizacao?.cidadeid};
+        const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao, estadoid: usuario.localizacao?.estadoid, cidadeid: usuario.localizacao?.cidadeid };
 
         return {
           estado: 'ok',
@@ -220,7 +220,7 @@ export class UsuariosService {
       const { senha, ...dadosPublicosUsuario } = usuario;
 
       let localizacao = "";
-      if (usuario.localizacao?.estadoid && usuario.localizacao?.cidadeid) 
+      if (usuario.localizacao?.estadoid && usuario.localizacao?.cidadeid)
         localizacao = "Brasil, " + usuario.localizacao?.estado?.nome + ", " + usuario.localizacao?.cidade?.nome;
 
       const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao };
@@ -237,9 +237,9 @@ export class UsuariosService {
     }
   }
 
-  public ehMeuPerfil(token : string, id : number) : boolean{
-    try{
-      if(!token) return false;
+  public ehMeuPerfil(token: string, id: number): boolean {
+    try {
+      if (!token) return false;
       const tokenDescodificado = this.jwt.verify(token);
       if (tokenDescodificado.usuario == id) return true;
       return false;
@@ -270,18 +270,18 @@ export class UsuariosService {
       where: { id: tokenDescodificado.usuario },
     });
     if (!usuarioAtual) throw new NotFoundException('Erro localizando usuario');
-    if (!usu.nome) throw new BadRequestException('Preencha o campo do nome');
-    if (!usu.email) throw new BadRequestException('Preencha o campo de email');
-    if (!usu.usuario) throw new BadRequestException('Preencha o campo do nome de usuario');
+    if (!usu.nome) usu.nome = usuarioAtual.nome;
+    if (!usu.email) usu.email = usuarioAtual.email;
+    if (!usu.usuario) usu.usuario = usuarioAtual.usuario;
 
     if (!usu.email.includes('@')) {
       throw new BadRequestException('Email inválido');
     }
 
-    const localizacao = {cidadeid: Number(undefined), estadoid:Number(undefined), usuarioid:Number(undefined)};
+    const localizacao = { cidadeid: Number(undefined), estadoid: Number(undefined), usuarioid: Number(undefined) };
     if (usu.cidadeid) {
       const cidade = await this.persistencia.cidade.findUnique({
-        where: { id: usu.cidadeid },
+        where: { id: Number(usu.cidadeid) },
       });
       if (!cidade) {
         throw new BadRequestException('Cidade inválida');
@@ -345,21 +345,21 @@ export class UsuariosService {
       }
 
       let localizacaoBD = await this.persistencia.localizacao.findUnique({
-        where: { id: tokenDescodificado.usuario }, 
+        where: { usuarioid: tokenDescodificado.usuario },
       });
-      if(localizacaoBD.cidadeid != localizacao.cidadeid || localizacaoBD.estadoid != localizacao.estadoid ){
+      if (localizacaoBD && ((localizacao.cidadeid && localizacaoBD.cidadeid != localizacao.cidadeid) ||
+        (localizacao.estadoid && localizacaoBD.estadoid != localizacao.estadoid))) {
         localizacaoBD = await this.persistencia.localizacao
-        .update({
-            where: { 
-              id: tokenDescodificado.usuario, 
+          .update({
+            where: {
+              usuarioid: tokenDescodificado.usuario,
             },
             data: {
               cidadeid: localizacao.cidadeid,
               estadoid: localizacao.estadoid,
             }
-        });
-  
-      } 
+          });
+      }
       usu.localizacaoid - localizacaoBD.id;
       const resultado = await this.persistencia.usuario
         .update({
@@ -373,7 +373,7 @@ export class UsuariosService {
             youtube: usu.youtube,
             zap: usu.zap,
             face: usu.face,
-            localizacao: { connect: { id: usu.localizacaoid } },
+            localizacao: { connect: { id: localizacaoBD.id } },
             tipo: usu.tipoid ? { connect: { nome: usu.tipoid } } : undefined,
             biografia: usu.biografia,
             imagem: usu.imagem,
@@ -387,7 +387,6 @@ export class UsuariosService {
           },
         })
         .then((usuario) => {
-          
           const { senha, ...dadosPublicosUsuario } = usuario;
           return {
             estado: 'ok',
@@ -444,6 +443,46 @@ export class UsuariosService {
             mensagem: `usuario com ${tokenDescodificado.usuario} não existe!`,
           };
         });
+      return resultado;
+    }
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token inválido ou expirado.');
+      }
+      console.log(error);
+      throw new BadRequestException('Algo deu errado.');
+    }
+
+  }
+
+  async removerBanner(token: string) {
+    try {
+      const tokenDescodificado = this.jwt.verify(token);
+      console.log(tokenDescodificado);
+      const resultado = await this.persistencia.usuario
+        .update({
+          where: { id: tokenDescodificado.usuario },
+          data: {
+            banner: null,
+            bannertipo: null,
+          },
+        })
+        .then((usuario) => {
+          console.log("banner: " + usuario)
+          const { senha, ...dadosPublicosUsuario } = usuario;
+          return {
+            estado: 'ok',
+            dados: dadosPublicosUsuario,
+          };
+        })
+        .catch((error) => {
+          console.log(error);
+          return {
+            estado: 'nok',
+            mensagem: `usuario com ${tokenDescodificado.usuario} não existe!`,
+          };
+        });
+      console.log("banner re: " + resultado)
       return resultado;
     }
     catch (error) {
