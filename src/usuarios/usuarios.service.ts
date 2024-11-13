@@ -360,7 +360,7 @@ export class UsuariosService {
             }
           });
       }
-      usu.localizacaoid - localizacaoBD.id;
+      usu.localizacaoid = localizacaoBD?.id ? localizacaoBD.id : undefined;
       const resultado = await this.persistencia.usuario
         .update({
           where: { id: tokenDescodificado.usuario },
@@ -373,7 +373,7 @@ export class UsuariosService {
             youtube: usu.youtube,
             zap: usu.zap,
             face: usu.face,
-            localizacao: { connect: { id: localizacaoBD.id } },
+            localizacao: usu.localizacaoid ? { connect: { id: usu.localizacaoid} } : undefined,
             tipo: usu.tipoid ? { connect: { nome: usu.tipoid } } : undefined,
             biografia: usu.biografia,
             imagem: usu.imagem,
