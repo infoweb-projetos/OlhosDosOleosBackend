@@ -1,9 +1,13 @@
 # Olhos dos Óleos API
 ``` bash
+# Execute na Raiz do Repositorio, não precisa dar CD
+# Instala tudo necessario para o projeto
 npm i
 
+# Tenta conectar o Prisma com Banco e incia o PrismaCliente(Usado para operações no Banco) 
 npx prisma migrate dev
 
+# Roda no modo Desenvolvedor
 npm run start:dev
 ```
 > No Workspace lembrar de tornar as visibilidade da porta publica para p frpnt conseguir acessar. So ir na seção "Portas" e clicar na linha desejada com botão direito na porta deseja que vai aprecer uma opção de visibilidade.
