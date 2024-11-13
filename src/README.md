@@ -155,6 +155,23 @@ export class AlgoService {
 ```
 
 #### Recebendo Imagens do Front
+Para lidar com imagens enviadas do Front temos que usar intercetadores, a 3 tipo deles, os interceptadores de multiplos arquivos de o de um e um curinga que recebe qualquer arquivo e qualquer quantidade.
+
+Para que voce consiga receber uma imagem no controlador voce precisa adicionar o UseInterceptos acima da função que tem que receber imagem. os imports vão estar abaixo com um comentario explicando em que eu usei.
+
+``` javascript
+import { 
+  UseInterceptors, // usado para indicar que a função aceita o recebimento de arquivos
+  UploadedFile, // o que a função vai receber(usado como parametro para lidar com um arquivo)
+  UploadedFiles // o que a função vai receber(usado como parametro para lidar com multiplos arquivos)
+} from '@nestjs/common';
+import { 
+  FileFieldsInterceptor, // intercepta, capta, arquivos.
+  FileInterceptor, // capta um arquivo
+  AnyFilesInterceptor // capta qualquer quantidade e qualquer arquivo
+} from '@nestjs/platform-express';
+```
+
 No momento fiz de duas formas diferentes o envio de multiplas imagens, ecolha a que preferir ou ache uma solução mais util. Usarei como exemplo codigo real e deixarei comentarios nele.
 ```javascript
   @ApiTags('Post')
