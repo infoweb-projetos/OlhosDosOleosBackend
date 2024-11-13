@@ -6,6 +6,8 @@ npx prisma migrate dev
 
 npm run start:dev
 ```
+> No Workspace lembrar de tornar as visibilidade da porta publica para p frpnt conseguir acessar. So ir na seção "Portas" e clicar na linha desejada com botão direito na porta deseja que vai aprecer uma opção de visibilidade.
+> Caso a API pare de responder é so mudar a porta, valor da const port, no src/main.ts e rodar denovo.
 ##
 ![Nest](https://img.shields.io/badge/Node%20Js-white?style=for-the-badge&logo=nodedotjs&logoColor=5FA04E)
 ![Nest](https://img.shields.io/badge/Nest%20Js-white?style=for-the-badge&logo=nestjs&logoColor=E0234E)
