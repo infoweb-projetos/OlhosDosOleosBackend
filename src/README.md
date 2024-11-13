@@ -40,7 +40,8 @@ Pasta | Descrição
 > Sem o AutenticacaoModule não teria validação de Token, ou seja qualquer pessoa conseguiria acessar tudo, mesmo deslogado.
 
 #### .controller.ts
-- O pontos a qual o fronte usa para se comunicar com o back, por meio do endpoint(url) sendo definido depois de um verbo relacionado a requisição(Post, Get, Patch, Delete), exemplo, no modulo de autenticação temos o ``` @Post('login') ``` que indica que a url vai vir com
+- O pontos a qual o fronte usa para se comunicar com o back, por meio do endpoint(url) sendo definido depois de um verbo relacionado a requisição(Post, Get, Patch, Delete), exemplo, no modulo de autenticação temos o ``` @Post('login') ``` que indica que a url vai vir com /login no final.
+- ```@Controller('posts')``` vem no inicio do controlador e é um componente importante na url, vindo antes do endpoint. Uma url completa poderia ser https://localhost:3000/posts/login, onde teriamos o link da api, o caminho para o controlado, e o endpoint que executara alguma função.
 - Em cada metodo dele é definido os parametros que devem vir na requisição e se ele precisa de autorização
 - Aqui podem ser feito validações mais leves como verificar se todos
 - É meio de campo entre a requisição e o banco(que é responsabilidade do service)
