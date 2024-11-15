@@ -1,7 +1,14 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { CategoriaService } from './categoria.service';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('categoria')
+@Controller('categorias')
 export class CategoriaController {
   constructor(private readonly categoriaService: CategoriaService) {}
+
+  @ApiTags('Categorias')
+  @Get('listar')
+  Listar() {
+    return this.categoriaService.listar();
+  }
 }

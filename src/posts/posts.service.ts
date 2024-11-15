@@ -141,9 +141,24 @@ export class PostsService {
           },
         });
         console.log(postCriado);
+        let processosSalvos = [];
+        for (let img of processo){
+          if (['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(img.mimetype)) {
+            let processoCriado = await this.persistencia.processo.create({
+              data:{
+                postid: postCriado.id,
+                imagem: img.buffer,
+                imagemtipo: img.mimetype,
+              }
+            });
+            processosSalvos.push(processoCriado);
+          }
+        }
+        console.log(processosSalvos);
         return {
           estado: 'ok',
           dados: postCriado,
+          processo: processosSalvos,
         };
       }
       catch (error) {
