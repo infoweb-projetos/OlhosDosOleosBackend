@@ -17,9 +17,8 @@ export class PostsController {
   Criar(@Req() req: Request, @Body() criarPost: CriarPost, @UploadedFiles() arquivos: Array<Express.Multer.File> | undefined) {
     const imagem = arquivos.find(arq => arq.fieldname === 'imagem');
     const arqprocesso = arquivos.filter(arq => arq.fieldname === 'processo');
-    console.log('criarPost:', criarPost);
-    console.log('imagem:', imagem);
-    console.log('processo:', arqprocesso);
+    criarPost.tags = JSON.parse(criarPost.tagsjson);
+    criarPost.ferramentas = JSON.parse(criarPost.ferramentasjson);
     const authHeader = req.headers['authorization']; 
     if (authHeader) {
       const token = authHeader.split(' ')[1]; 

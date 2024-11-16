@@ -57,7 +57,6 @@ export class PostsService {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
         throw new UnauthorizedException('Token inválido ou expirado.');
       }
-      console.log(error);
       throw new BadRequestException('Algo deu errado.');
     }
   }
@@ -127,7 +126,6 @@ export class PostsService {
           post.imagem = imagem.buffer;
           post.imagemtipo = imagem.mimetype;
         }
-        console.log(post.rascunho);
         const postCriado = await this.persistencia.post.create({
           data:{
             titulo: post.titulo,
@@ -140,7 +138,46 @@ export class PostsService {
             descricao: post.descricao ? post.descricao : null,
           },
         });
-        console.log(postCriado);
+
+        for (let tag of post.tags){
+          const tagExiste = await this.persistencia.tag.findUnique({
+            where: { nome: tag }
+          });
+          if (!tagExiste){
+            await this.persistencia.tag.create({
+              data:{
+                nome: tag,
+              }
+            });
+          }
+          await this.persistencia.postTag.create({
+            data:{
+              postid: postCriado.id,
+              tagid: tag,
+            }
+          })
+        }
+
+        for (let tag of post.ferramentas){
+          const tagExiste = await this.persistencia.tag.findUnique({
+            where: { nome: tag }
+          });
+          if (!tagExiste){
+            await this.persistencia.tag.create({
+              data:{
+                nome: tag,
+                ferramenta: true,
+              }
+            });
+          }
+          await this.persistencia.postTag.create({
+            data:{
+              postid: postCriado.id,
+              tagid: tag,
+            }
+          })
+        }
+
         let processosSalvos = [];
         for (let img of processo){
           if (['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(img.mimetype)) {
@@ -154,7 +191,6 @@ export class PostsService {
             processosSalvos.push(processoCriado);
           }
         }
-        console.log(processosSalvos);
         return {
           estado: 'ok',
           dados: postCriado,

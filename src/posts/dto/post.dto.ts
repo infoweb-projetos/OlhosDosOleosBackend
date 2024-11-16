@@ -35,5 +35,14 @@ export class CriarPost {
     usuarioid: number;
 
     @ApiProperty()
+    tagsjson?: string;
+
+    @ApiProperty()
+    ferramentasjson?: string;
+
+    @ApiProperty()
     tags?: string[];
+
+    @ApiProperty()
+    ferramentas?: string[];
 }

@@ -99,7 +99,8 @@ npm run start:dev
 - Comando para criar um modulo:
 ```bash
 # Comando para criar um modulo
-nest g resource nomeDoRecurso --no-spec
+npx nest g resource nomeRecurso --no-spec
+# selecione REST API. Y para gerar um crud simples, N para criar o controlador e service vazio
 # nomeDoRecurso é o nome do modulo
 ```
 

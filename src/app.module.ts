@@ -10,9 +10,10 @@ import { EstadoModule } from './estado/estado.module';
 import { CidadeModule } from './cidade/cidade.module';
 import { TipoartistaModule } from './tipoartista/tipoartista.module';
 import { CategoriaModule } from './categoria/categoria.module';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
-  imports: [UsuariosModule, AutenticacaoModule, PersistenciaModule, UploadModule, PostsModule, EstadoModule, CidadeModule, TipoartistaModule, CategoriaModule],
+  imports: [UsuariosModule, AutenticacaoModule, PersistenciaModule, UploadModule, PostsModule, EstadoModule, CidadeModule, TipoartistaModule, CategoriaModule, TagsModule],
   controllers: [AppController],
   providers: [AppService],
 })
