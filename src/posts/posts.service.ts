@@ -235,5 +235,28 @@ export class PostsService {
     }
 
   }
+  async excluir(token:string, postId:number){
+    try{
+      const tokenDecodificado = this.jwt.verify(token);
 
+      const post= await this.persistencia.post.findUnique({
+        where:{id:postId},
+      });
+      if (!post){
+        throw new BadRequestException("O post não foi encontrado ou não existe!");
+      }
+      if (post.usuarioid !== tokenDecodificado.usuario){
+        throw new BadRequestException("Você não tem permissão para excluir esse post!");
+      }
+      await this.persistencia.post.delete({
+        where:{id:postId},
+      });
+      return {'estado':'OK', 'mensagem':'O post foi excluído com sucesso!'}
+    }catch(error){
+      if(error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError'){
+        throw new BadRequestException ('Token inválido ou expirado!')  
+      }
+      throw new BadRequestException('Houve um erro na operação')
+    }
+    }
 }

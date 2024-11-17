@@ -3,6 +3,7 @@ import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { CriarPost } from './dto/post.dto';
+import { Delete } from '@nestjs/common';
 import { PostsService } from './posts.service';
 
 @Controller('posts')
@@ -92,8 +93,16 @@ export class PostsController {
 
     
   }
-
-  
-  
+@ApiTags('Post')
+@Delete('excluir/:id')
+@UseGuards(JwtAuthGuard)
+ async excluirPost(@Req() r:Request, @Param('id') id: string){
+  const authHeader= r.headers['authorization'];
+  if(authHeader){
+    const token = authHeader.split(' ')[1];
+    return this.postsService.excluir(token, Number(id))
+  }
+  return {'mensagem':'Não foi possivel localizar o token'}
+ }
 
 }
