@@ -12,7 +12,7 @@ export const jwtSecret = 'alunos@infoweb@cnat';
   controllers: [AutenticacaoController],
   imports: [PersistenciaModule, PassportModule, JwtModule.register({
     secret: jwtSecret,
-    signOptions: {expiresIn: '5m'},
+    signOptions: {expiresIn: '30m'},
   })],
   providers: [AutenticacaoService, JwtStrategy],
   exports: [JwtModule],

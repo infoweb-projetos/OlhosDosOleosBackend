@@ -11,9 +11,10 @@ import { CidadeModule } from './cidade/cidade.module';
 import { TipoartistaModule } from './tipoartista/tipoartista.module';
 import { CategoriaModule } from './categoria/categoria.module';
 import { TagsModule } from './tags/tags.module';
+import { PastasModule } from './pastas/pastas.module';
 
 @Module({
-  imports: [UsuariosModule, AutenticacaoModule, PersistenciaModule, UploadModule, PostsModule, EstadoModule, CidadeModule, TipoartistaModule, CategoriaModule, TagsModule],
+  imports: [UsuariosModule, AutenticacaoModule, PersistenciaModule, UploadModule, PostsModule, EstadoModule, CidadeModule, TipoartistaModule, CategoriaModule, TagsModule, PastasModule],
   controllers: [AppController],
   providers: [AppService],
 })

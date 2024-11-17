@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -64,6 +64,7 @@ model Usuario {
   cor3 String?
   cor4 String?
   posts Post[]
+  pastas Pasta[]
   entrada DateTime @default(now())
 }
 
@@ -79,6 +80,7 @@ model Post{
   imagemtipo String
   processo Processo[] // as multiplas imagens que podem ser adicionadas pra mostrar o processo de criação da obra
   tags PostTag[]
+  pastas PostPasta[]
   sensivel Boolean @default(false)
   rascunho Boolean @default(false)
   excluido Boolean @default(false)
@@ -110,4 +112,20 @@ model PostTag {
   tag Tag @relation(fields: [tagid], references: [nome], onDelete: Cascade)   
   post Post @relation(fields: [postid], references: [id], onDelete: Cascade)     
   @@id([postid, tagid])
+}
+
+model Pasta {
+  id Int @id @default(autoincrement())
+  nome String
+  posts PostPasta[]
+  usuario Usuario @relation(fields: [usuarioid], references: [id]) 
+  usuarioid Int
+}
+
+model PostPasta {
+  postid Int 
+  pastaid Int 
+  pasta Pasta @relation(fields: [pastaid], references: [id], onDelete: Cascade)   
+  post Post @relation(fields: [postid], references: [id], onDelete: Cascade)     
+  @@id([postid, pastaid])
 }

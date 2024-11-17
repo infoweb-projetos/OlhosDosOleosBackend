@@ -5,7 +5,7 @@ import { PersistenciaModule } from 'src/persistencia/persistencia.module';
 
 @Module({
   controllers: [TagsController],
-  imports: [PersistenciaModule],
+  imports: [PersistenciaModule], 
   providers: [TagsService],
 })
 export class TagsModule {}

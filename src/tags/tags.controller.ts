@@ -17,4 +17,5 @@ export class TagsController {
   Ferramentas() {
     return this.tagsService.listar(true);
   }
+  
 }
