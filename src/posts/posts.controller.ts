@@ -46,6 +46,28 @@ export class PostsController {
   }
 
   @ApiTags('Post')
+  @Get('post/:id')
+  @UseGuards(JwtAuthGuard)
+  post(@Req() req: Request, @Param('id') id: string) {
+    try{
+      const authHeader = req.headers['authorization'];
+      if (authHeader) return this.postsService.post(Number(id));
+      return { message: 'Token não encontrado' };
+    }
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        return{
+          message:'Token inválido ou expirado.',
+        };
+      }
+      return{
+        message:'Algo deu errado.',
+      };
+    }
+  }
+
+
+  @ApiTags('Post')
   @Get('usuario/:id')
   listarPostUsuario(@Req() req: Request, @Param('id') id: string) {
     try{

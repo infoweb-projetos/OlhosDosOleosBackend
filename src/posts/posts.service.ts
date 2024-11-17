@@ -28,6 +28,30 @@ export class PostsService {
     };
   }
 
+  async post(id: number) {
+    return {
+      estado: 'ok',
+      dados: await this.persistencia.post.findUnique({
+        where:{
+          id: id,
+        },
+        include:{
+          tags: {
+            select: {
+              tag: {
+                select: {
+                  nome: true,
+                  ferramenta: true,
+                }
+              }
+            }
+          },
+          processo: true,
+        }
+      }),
+    };
+  }
+
   async listarPostUsuario(id : number) {
     return {
       estado: 'ok',
