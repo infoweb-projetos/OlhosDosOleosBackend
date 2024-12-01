@@ -21,17 +21,21 @@ export class UsuariosService {
       throw new BadRequestException('Email inválido');
     }
 
-    const localizacao = { cidadeid: Number(undefined), estadoid: Number(undefined), usuarioid: Number(undefined) };
+    const localizacao = { cidadeid: null, estadoid: null, usuarioid: null };
+    if (usu.estadoid) {
+      const estado = await this.persistencia.estado.findUnique({
+        where: { id: Number(usu.estadoid) },
+      });
+      if (estado) localizacao.estadoid = estado.id;
+    }
     if (usu.cidadeid) {
       const cidade = await this.persistencia.cidade.findUnique({
         where: { id: Number(usu.cidadeid) },
       });
-      if (!cidade) {
-        console.log(usu.cidadeid);
-        throw new BadRequestException('Cidade inválida');
+      if (cidade) {
+        localizacao.cidadeid = cidade.id;
+        if (!localizacao.estadoid) localizacao.estadoid = cidade.estadoid;
       }
-      localizacao.cidadeid = cidade.id;
-      localizacao.estadoid = cidade.estadoid;
     }
 
     if (usu.tipoid) {
@@ -278,16 +282,21 @@ export class UsuariosService {
       throw new BadRequestException('Email inválido');
     }
 
-    const localizacao = { cidadeid: Number(undefined), estadoid: Number(undefined), usuarioid: Number(undefined) };
+    const localizacao = { cidadeid: null, estadoid: null, usuarioid: null };
+    if (usu.estadoid) {
+      const estado = await this.persistencia.estado.findUnique({
+        where: { id: Number(usu.estadoid) },
+      });
+      if (estado) localizacao.estadoid = estado.id;
+    }
     if (usu.cidadeid) {
       const cidade = await this.persistencia.cidade.findUnique({
         where: { id: Number(usu.cidadeid) },
       });
-      if (!cidade) {
-        throw new BadRequestException('Cidade inválida');
+      if (cidade) {
+        localizacao.cidadeid = cidade.id;
+        if (!localizacao.estadoid) localizacao.estadoid = cidade.estadoid;
       }
-      localizacao.cidadeid = cidade.id;
-      localizacao.estadoid = cidade.estadoid;
     }
 
     if (usu.tipoid) {
@@ -295,7 +304,7 @@ export class UsuariosService {
         where: { nome: usu.tipoid },
       });
       if (!tipo) {
-        throw new BadRequestException('Cidade invalida');
+        usu.tipoid = null;
       }
     }
 
@@ -303,6 +312,7 @@ export class UsuariosService {
     this.validarLink(usu.face, 'Facebook');
     this.validarLink(usu.zap, 'WhatsApp');
     this.validarLink(usu.youtube, 'YouTube');
+    console.log(usu.youtube);
 
     this.validarImagem(foto, 'foto');
     this.validarImagem(banner, 'banner');
@@ -347,20 +357,42 @@ export class UsuariosService {
       let localizacaoBD = await this.persistencia.localizacao.findUnique({
         where: { usuarioid: tokenDescodificado.usuario },
       });
-      if (localizacaoBD && ((localizacao.cidadeid && localizacaoBD.cidadeid != localizacao.cidadeid) ||
-        (localizacao.estadoid && localizacaoBD.estadoid != localizacao.estadoid))) {
-        localizacaoBD = await this.persistencia.localizacao
-          .update({
-            where: {
-              usuarioid: tokenDescodificado.usuario,
-            },
+      if (localizacao.cidadeid && localizacao.cidadeid){
+        if (localizacaoBD) {
+          localizacaoBD = await this.persistencia.localizacao
+            .update({
+              where: {
+                usuarioid: tokenDescodificado.usuario,
+              },
+              data: {
+                cidadeid: localizacao.cidadeid,
+                estadoid: localizacao.estadoid,
+              }
+            });
+        }
+        else {
+          localizacaoBD = await this.persistencia.localizacao
+          .create({
             data: {
+              usuarioid: tokenDescodificado.usuario,
               cidadeid: localizacao.cidadeid,
               estadoid: localizacao.estadoid,
             }
           });
+        }
       }
-      usu.localizacaoid = localizacaoBD?.id ? localizacaoBD.id : undefined;
+      else{
+        if (localizacaoBD && !usu.ehpersonalizacao){
+          localizacaoBD = await this.persistencia.localizacao
+          .delete({
+            where: {
+              usuarioid: tokenDescodificado.usuario,
+            },
+          });
+        }
+      }
+    
+      usu.localizacaoid = localizacaoBD? (localizacaoBD.id ? localizacaoBD.id : undefined) : null;
       const resultado = await this.persistencia.usuario
         .update({
           where: { id: tokenDescodificado.usuario },
@@ -369,21 +401,21 @@ export class UsuariosService {
             email: usu.email,
             senha: usu.senha,
             usuario: usu.usuario,
-            insta: usu.insta,
-            youtube: usu.youtube,
-            zap: usu.zap,
-            face: usu.face,
+            insta: !usu.ehpersonalizacao ? (usu.insta ? usu.insta : null) : usuarioAtual.insta,
+            youtube: !usu.ehpersonalizacao ? (usu.youtube ? usu.youtube : null) : usuarioAtual.youtube,
+            zap: !usu.ehpersonalizacao ? (usu.zap ? usu.zap : null) : usuarioAtual.zap,
+            face: !usu.ehpersonalizacao ? (usu.face ? usu.face : null) : usuarioAtual.face,
             localizacao: usu.localizacaoid ? { connect: { id: usu.localizacaoid} } : undefined,
-            tipo: usu.tipoid ? { connect: { nome: usu.tipoid } } : undefined,
-            biografia: usu.biografia,
-            imagem: usu.imagem,
-            imagemtipo: usu.imagemtipo,
-            banner: usu.banner,
-            bannertipo: usu.bannertipo,
-            cor1: usu.cor1,
-            cor2: usu.cor2,
-            cor3: usu.cor3,
-            cor4: usu.cor4
+            tipoid: !usu.ehpersonalizacao ? (usu.tipoid ? usu.tipoid : null) : usuarioAtual.tipoid,
+            biografia: !usu.ehpersonalizacao ? usu.biografia : usuarioAtual.biografia,
+            imagem: !usu.ehpersonalizacao ? usu.imagem : usuarioAtual.imagem,
+            imagemtipo: !usu.ehpersonalizacao ? usu.imagemtipo : usuarioAtual.imagemtipo,
+            banner: usu.ehpersonalizacao ? usu.banner : usuarioAtual.banner,
+            bannertipo: usu.ehpersonalizacao ? usu.bannertipo : usuarioAtual.bannertipo,
+            cor1: usu.ehpersonalizacao ? usu.cor1 : usuarioAtual.cor1,
+            cor2: usu.ehpersonalizacao ? usu.cor2 : usuarioAtual.cor2,
+            cor3: usu.ehpersonalizacao ? usu.cor3 : usuarioAtual.cor3,
+            cor4: usu.ehpersonalizacao ? usu.cor4 : usuarioAtual.cor4
           },
         })
         .then((usuario) => {

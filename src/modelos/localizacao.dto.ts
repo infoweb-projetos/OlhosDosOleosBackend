@@ -5,13 +5,13 @@ import { CreateUsuarioDto } from "src/usuarios/dto/create-usuario.dto";
 
 export class LocalizacaoDto {
     @ApiProperty()
-    id: number;
+    id?: number;
     @ApiProperty()
-    usuarioid: number;
+    usuarioid?: number;
     @ApiProperty()
-    cidadeid: number;
+    cidadeid?: number;
     @ApiProperty()
-    estadoid: number;
+    estadoid?: number;
 
     estado?: EstadoDto;
     cidade?: CidadeDto;

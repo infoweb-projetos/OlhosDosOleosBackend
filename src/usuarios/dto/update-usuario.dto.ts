@@ -65,4 +65,7 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
 
     @ApiProperty({ required: false })
     cor4?: string;
+
+    @ApiProperty({ required: false })
+    ehpersonalizacao: boolean;
 }
