@@ -391,7 +391,6 @@ export class PostsService {
   async excluir(token:string, postId:number){
     try{
       const tokenDecodificado = this.jwt.verify(token);
-
       const post= await this.persistencia.post.findUnique({
         where:{id:postId},
       });
@@ -401,6 +400,15 @@ export class PostsService {
       if (post.usuarioid !== tokenDecodificado.usuario){
         throw new BadRequestException("Você não tem permissão para excluir esse post!");
       }
+      await this.persistencia.postPasta.deleteMany({
+        where:{postid: postId}
+      });
+      await this.persistencia.postTag.deleteMany({
+        where:{postid: postId}
+      });
+      await this.persistencia.processo.deleteMany({
+        where:{postid: postId}
+      });
       await this.persistencia.post.delete({
         where:{id:postId},
       });
