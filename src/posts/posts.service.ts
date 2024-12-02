@@ -235,6 +235,159 @@ export class PostsService {
     }
 
   }
+
+  async atualizar(token: string, post: CriarPost, imagem: Express.Multer.File, processo: Array<Express.Multer.File> | undefined) {
+    try {
+      const tokenDescodificado = this.jwt.verify(token);
+      const usuario = await this.persistencia.usuario.findUnique({
+        where: { id: tokenDescodificado.usuario },
+      });
+
+      if(usuario.id != post.usuarioid){
+        throw new BadRequestException('Usuario invalido');
+      }
+
+      if (!imagem) {
+        throw new BadRequestException('Imagem da obra é obrigatória.');
+      }
+
+      if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(imagem.mimetype)) {
+        throw new BadRequestException('Foto da Obra enviado não é uma imagem válida');
+      }
+  
+      if (!post.titulo) {
+        throw new BadRequestException('Titulo invalido');
+      }
+
+      if (post.categoriaid) {
+        const categoria = await this.persistencia.categoria.findUnique({
+          where: { nome: post.categoriaid },
+        });
+        if (!categoria) {
+          throw new BadRequestException('Categoria invalida');
+        }
+      }
+
+      try {
+        if (imagem) {
+          post.imagem = imagem.buffer;
+          post.imagemtipo = imagem.mimetype;
+        }
+        const postCriado = await this.persistencia.post.update({
+          where:{
+            id: post.id,
+          },
+          data:{
+            titulo: post.titulo,
+            categoria: { connect: { nome: post.categoriaid } } ,
+            usuario: { connect: { id: Number(post.usuarioid) } },
+            imagem: post.imagem,
+            imagemtipo: post.imagemtipo,
+            rascunho: post.rascunho ? this.stringParaBooleano(post.rascunho) : false,
+            sensivel: post.sensivel ? this.stringParaBooleano(post.sensivel) : false,
+            descricao: post.descricao ? post.descricao : null,
+          },
+        });
+
+        for (let tag of post.tags){
+          const tagExiste = await this.persistencia.tag.findUnique({
+            where: { nome: tag }
+          });
+          if (!tagExiste){
+            await this.persistencia.tag.create({
+              data:{
+                nome: tag,
+              }
+            });
+          }
+          const tagAssociada = await this.persistencia.postTag.findFirst({
+            where: { postid:  postCriado.id,  tagid: tag}
+          });
+          if (!tagAssociada){
+            await this.persistencia.postTag.create({
+              data:{
+                postid: postCriado.id,
+                tagid: tag,
+              }
+            })
+          }
+        }
+        for (let tag of post.ferramentas){
+          const tagExiste = await this.persistencia.tag.findUnique({
+            where: { nome: tag }
+          });
+          if (!tagExiste){
+            await this.persistencia.tag.create({
+              data:{
+                nome: tag,
+                ferramenta: true,
+              }
+            });
+          }
+          const tagAssociada = await this.persistencia.postTag.findFirst({
+            where: { postid:  postCriado.id,  tagid: tag}
+          });
+          if (!tagAssociada){
+            await this.persistencia.postTag.create({
+              data:{
+                postid: postCriado.id,
+                tagid: tag,
+              }
+            })
+          }
+        }
+
+        const tagAssociadas = await this.persistencia.postTag.findMany({
+          where: { postid:  postCriado.id}
+        });
+        for (let tag of tagAssociadas){
+          const tagExiste = post.tags.filter(t => t == tag.tagid).length > 0 || post.ferramentas.filter(t => t == tag.tagid).length > 0 ? true : false;
+          if(!tagExiste){
+            await this.persistencia.postTag.deleteMany({
+              where: { postid:  postCriado.id,  tagid: tag.tagid}
+            });
+          }
+        }
+
+        await this.persistencia.processo.deleteMany({
+          where:{
+            postid: postCriado.id,
+          }
+        });
+        let processosSalvos = [];
+        for (let img of processo){
+          if (['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(img.mimetype)) {
+            let processoCriado = await this.persistencia.processo.create({
+              data:{
+                postid: postCriado.id,
+                imagem: img.buffer,
+                imagemtipo: img.mimetype,
+              }
+            });
+            processosSalvos.push(processoCriado);
+          }
+        }
+        return {
+          estado: 'ok',
+          dados: postCriado,
+          processo: processosSalvos,
+        };
+      }
+      catch (error) {
+        console.error('Erro ao criar Post:', error);
+        throw new BadRequestException('Algo deu errado:' + error);
+      }
+
+    }
+    catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token inválido ou expirado.');
+      }
+      throw new BadRequestException('Erro ao processar a solicitação.');
+    }
+
+  }
+
   async excluir(token:string, postId:number){
     try{
       const tokenDecodificado = this.jwt.verify(token);
