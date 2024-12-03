@@ -20,20 +20,12 @@ export class PastasService {
       if (isNaN(pastaIdNumber)) {
         throw new BadRequestException('ID da pasta inválido');
       }
-  
+      console.log('aqui');
       // Buscando a pasta com os posts associados (via PostPasta)
       const pasta = await this.persistencia.postPasta.findMany({
         where: { pastaid: pastaIdNumber },
         include: {
           post: { 
-           select:{
-            imagem: true,
-            titulo: true,
-            id: true,
-            sensivel: true,
-            usuarioid: true,
-            imagemtipo: true,
-           },
            include:{
             usuario:{
               select:{
@@ -45,12 +37,11 @@ export class PastasService {
            }
           },
         },
+      }).then(response => {
+        return response; 
+      }).catch(error =>{
+        console.log(error);
       });
-  
-      // Verificando se a pasta foi encontrada
-      if (!pasta) {
-        throw new BadRequestException('Pasta não encontrada.');
-      }
 
       return pasta; 
     } catch (error) {
