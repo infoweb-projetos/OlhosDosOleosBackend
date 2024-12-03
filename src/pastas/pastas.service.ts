@@ -14,9 +14,7 @@ export class PastasService {
   }
 
   async getPostsByPasta(pastaId: string) {
-    try {
-      // Validação do token
-  
+    try { 
       // Convertendo pastaId para número
       const pastaIdNumber = Number(pastaId);
       if (isNaN(pastaIdNumber)) {
@@ -27,7 +25,7 @@ export class PastasService {
       const pasta = await this.persistencia.postPasta.findMany({
         where: { pastaid: pastaIdNumber },
         include: {
-          post: { // Relacionamento com PostPasta (tabela intermediária)
+          post: { 
            select:{
             imagem: true,
             titulo: true,
@@ -53,10 +51,8 @@ export class PastasService {
       if (!pasta) {
         throw new BadRequestException('Pasta não encontrada.');
       }
-  
-      // Retorna os posts da pasta
-      // Acessa os posts relacionados através da tabela PostPasta
-      return pasta; // Acessa os posts relacionados
+
+      return pasta; 
     } catch (error) {
       // Tratamento de erro relacionado ao token ou falha na requisição
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
@@ -65,9 +61,6 @@ export class PastasService {
       throw new BadRequestException('Erro ao processar a solicitação.');
     }
   }
-  
-  
-  
 
   async findAll(token: string) {
     try {

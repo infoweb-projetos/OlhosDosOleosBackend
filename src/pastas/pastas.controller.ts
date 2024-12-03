@@ -26,6 +26,7 @@ export class PastasController {
     return { message: 'Token não encontrado' };
   }
 
+  @ApiTags('Pastas')
   @Get(':id/posts')
   @UseGuards(JwtAuthGuard)
   async getPostsByPasta(@Param('id') pastaId: string, @Req() req: Request) {
