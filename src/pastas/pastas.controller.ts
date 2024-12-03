@@ -26,6 +26,17 @@ export class PastasController {
     return { message: 'Token não encontrado' };
   }
 
+  // @Get(':id/posts')
+  // @UseGuards(JwtAuthGuard)
+  // async getPostsByPasta(@Param('id') pastaId: string, @Req() req: Request) {
+  //   const authHeader = req.headers['authorization']; 
+  //   if (authHeader) {
+  //     const token = authHeader.split(' ')[1]; 
+  //     return this.pastasService.getPostsByPasta(pastaId, token);
+  //   }
+  //   return { message: 'Token não encontrado' };
+  // }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.pastasService.findOne(+id);
