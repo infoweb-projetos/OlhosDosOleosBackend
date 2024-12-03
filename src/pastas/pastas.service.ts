@@ -13,56 +13,58 @@ export class PastasService {
     return 'This action adds a new pasta';
   }
 
-  // async getPostsByPasta(pastaId: string, token: string): Promise<Post[]> {
-  //   try {
-  //     // Validação do token
-  //     const tokenDescodificado = this.jwt.verify(token);
+  async getPostsByPasta(pastaId: string) {
+    try {
+      // Validação do token
   
-  //     // Convertendo pastaId para número
-  //     const pastaIdNumber = Number(pastaId);
-  //     if (isNaN(pastaIdNumber)) {
-  //       throw new BadRequestException('ID da pasta inválido');
-  //     }
+      // Convertendo pastaId para número
+      const pastaIdNumber = Number(pastaId);
+      if (isNaN(pastaIdNumber)) {
+        throw new BadRequestException('ID da pasta inválido');
+      }
   
-  //     // Buscando a pasta com os posts associados (via PostPasta)
-  //     const pasta = await this.persistencia.pasta.findUnique({
-  //       where: { id: pastaIdNumber },
-  //       include: {
-  //         posts: { // Relacionamento com PostPasta (tabela intermediária)
-  //           include: {
-  //             post: { // Relacionamento com Post
-  //               include: {
-  //                 usuario: { // Inclui o usuário do post
-  //                   select: {
-  //                     nome: true, // Nome do usuário
-  //                     imagem: true, // Imagem binária do usuário
-  //                   },
-  //                 },
-  //                 imagem: true, // Imagem binária do post (Bytes)
-  //                 imagemtipo: true, // Tipo da imagem do post
-  //               },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     });
+      // Buscando a pasta com os posts associados (via PostPasta)
+      const pasta = await this.persistencia.postPasta.findMany({
+        where: { pastaid: pastaIdNumber },
+        include: {
+          post: { // Relacionamento com PostPasta (tabela intermediária)
+           select:{
+            imagem: true,
+            titulo: true,
+            id: true,
+            sensivel: true,
+            usuarioid: true,
+            imagemtipo: true,
+           },
+           include:{
+            usuario:{
+              select:{
+                nome: true,
+                imagem: true,
+                imagemtipo: true,
+              }
+            }
+           }
+          },
+        },
+      });
   
-  //     // Verificando se a pasta foi encontrada
-  //     if (!pasta) {
-  //       throw new BadRequestException('Pasta não encontrada.');
-  //     }
+      // Verificando se a pasta foi encontrada
+      if (!pasta) {
+        throw new BadRequestException('Pasta não encontrada.');
+      }
   
-  //     // Retorna os posts da pasta
-  //     // Acessa os posts relacionados através da tabela PostPasta
-  //     return pasta.posts.map((postPasta) => postPasta.post); // Acessa os posts relacionados
-  //   } catch (error) {
-  //     // Tratamento de erro relacionado ao token ou falha na requisição
-  //     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-  //       throw new UnauthorizedException('Token inválido ou expirado.');
-  //     }
-  //     throw new BadRequestException('Erro ao processar a solicitação.');
-  //   }
-  // }
+      // Retorna os posts da pasta
+      // Acessa os posts relacionados através da tabela PostPasta
+      return pasta; // Acessa os posts relacionados
+    } catch (error) {
+      // Tratamento de erro relacionado ao token ou falha na requisição
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token inválido ou expirado.');
+      }
+      throw new BadRequestException('Erro ao processar a solicitação.');
+    }
+  }
   
   
   
