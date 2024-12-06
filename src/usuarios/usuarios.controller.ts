@@ -147,4 +147,16 @@ export class UsuariosController {
   remove(@Param('id') id: string) {
     return this.usuariosService.remove(+id);
   }
+
+  @ApiTags('Usuario')
+  @Post('seguir/:id')
+  @UseGuards(JwtAuthGuard)
+  seguirOuParar(@Req() req: Request, @Param('id') id: string) {
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      return this.usuariosService.seguirOuParar(token, +id);
+    }
+    return { message: 'Usuario não encontrado' };
+  }
 }

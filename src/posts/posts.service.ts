@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
 import { PersistenciaService } from 'src/persistencia/persistencia.service';
 import { JwtService } from '@nestjs/jwt';
 import { CriarPost } from './dto/post.dto';
@@ -20,6 +20,7 @@ export class PostsService {
         },
         include:{
           usuario: true,
+          curtidas: true,
         },
         orderBy:{
           entrada: "desc",
@@ -384,6 +385,51 @@ export class PostsService {
         throw new UnauthorizedException('Token inválido ou expirado.');
       }
       throw new BadRequestException('Erro ao processar a solicitação.');
+    }
+
+  }
+
+  async curtirOuDescurtir(token: string, postId: number) {
+    const tokenDescodificado = this.jwt.verify(token);
+    const usuarioAtual = await this.persistencia.usuario.findUnique({
+      where: { id: tokenDescodificado.usuario },
+    });
+    if (!usuarioAtual) throw new NotFoundException('Erro localizando usuario');
+
+    const curtido = await this.persistencia.curtida.findUnique({
+      where:{usuarioid_postid: {usuarioid:tokenDescodificado.usuario, postid:postId}}
+    });
+    
+    if (curtido){
+      try {
+        const resultado = await this.persistencia.curtida.delete({
+          where:{usuarioid_postid: {usuarioid:tokenDescodificado.usuario, postid:postId}}
+        })
+        return {
+          estado: 'ok',
+          dados: resultado,
+        };
+      
+      } 
+      catch (error) {
+        return {estado: 'nok', erro: error}
+      }
+    }
+    else{
+      try {
+        const resultado = await this.persistencia.curtida.create({
+          data:{usuarioid:tokenDescodificado.usuario, postid:postId}
+        });
+
+        return {
+          estado: 'ok',
+          dados: resultado,
+        };
+      
+      } 
+      catch (error) {
+        return {estado: 'nok', erro: error}
+      }
     }
 
   }

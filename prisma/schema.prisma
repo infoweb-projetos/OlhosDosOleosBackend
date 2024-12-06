@@ -66,6 +66,9 @@ model Usuario {
   posts Post[]
   pastas Pasta[]
   entrada DateTime @default(now())
+  seguidores  UsuarioSeguidor[] @relation("seguidor") 
+  seguidos    UsuarioSeguidor[] @relation("seguindo")  
+  postcurtidos  Curtida[]
 }
 
 model Post{
@@ -85,6 +88,7 @@ model Post{
   rascunho Boolean @default(false)
   excluido Boolean @default(false)
   entrada DateTime @default(now())
+  curtidas  Curtida[] 
 }
 
 model Processo{
@@ -129,3 +133,21 @@ model PostPasta {
   post Post @relation(fields: [postid], references: [id], onDelete: Cascade)     
   @@id([postid, pastaid])
 }
+
+model UsuarioSeguidor {
+  usuarioid Int 
+  seguidorid Int 
+  usuario Usuario @relation("seguindo", fields: [usuarioid], references: [id], onDelete: Cascade)
+  seguidor Usuario @relation("seguidor", fields: [seguidorid], references: [id], onDelete: Cascade)   
+  @@id([usuarioid, seguidorid])
+}
+
+model Curtida {
+  usuarioid Int 
+  postid Int 
+  post Post @relation(fields: [postid], references: [id], onDelete: Cascade)   
+  usuario Usuario @relation(fields: [usuarioid], references: [id], onDelete: Cascade)
+  @@id([usuarioid, postid])
+}
+
+

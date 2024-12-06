@@ -8,7 +8,7 @@ import { PostsService } from './posts.service';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService) { }
 
   @ApiTags('Post')
   @Post('criar')
@@ -20,9 +20,9 @@ export class PostsController {
     const arqprocesso = arquivos.filter(arq => arq.fieldname === 'processo');
     criarPost.tags = JSON.parse(criarPost.tagsjson);
     criarPost.ferramentas = JSON.parse(criarPost.ferramentasjson);
-    const authHeader = req.headers['authorization']; 
+    const authHeader = req.headers['authorization'];
     if (authHeader) {
-      const token = authHeader.split(' ')[1]; 
+      const token = authHeader.split(' ')[1];
       return this.postsService.criar(token, criarPost, imagem, arqprocesso)
     }
     return { message: 'Token não encontrado' };
@@ -38,9 +38,9 @@ export class PostsController {
     const arqprocesso = arquivos.filter(arq => arq.fieldname === 'processo');
     criarPost.tags = JSON.parse(criarPost.tagsjson);
     criarPost.ferramentas = JSON.parse(criarPost.ferramentasjson);
-    const authHeader = req.headers['authorization']; 
+    const authHeader = req.headers['authorization'];
     if (authHeader) {
-      const token = authHeader.split(' ')[1]; 
+      const token = authHeader.split(' ')[1];
       criarPost.id = Number(id);
       return this.postsService.atualizar(token, criarPost, imagem, arqprocesso)
     }
@@ -57,9 +57,9 @@ export class PostsController {
   @Get('meus')
   @UseGuards(JwtAuthGuard)
   meus(@Req() req: Request) {
-    const authHeader = req.headers['authorization']; 
+    const authHeader = req.headers['authorization'];
     if (authHeader) {
-      const token = authHeader.split(' ')[1]; 
+      const token = authHeader.split(' ')[1];
       return this.postsService.meus(token);
     }
     return { message: 'Token não encontrado' };
@@ -69,19 +69,19 @@ export class PostsController {
   @Get('post/:id')
   @UseGuards(JwtAuthGuard)
   post(@Req() req: Request, @Param('id') id: string) {
-    try{
+    try {
       const authHeader = req.headers['authorization'];
       if (authHeader) return this.postsService.post(Number(id));
       return { message: 'Token não encontrado' };
     }
     catch (error) {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-        return{
-          message:'Token inválido ou expirado.',
+        return {
+          message: 'Token inválido ou expirado.',
         };
       }
-      return{
-        message:'Algo deu errado.',
+      return {
+        message: 'Algo deu errado.',
       };
     }
   }
@@ -90,7 +90,7 @@ export class PostsController {
   @ApiTags('Post')
   @Get('usuario/:id')
   listarPostUsuario(@Req() req: Request, @Param('id') id: string) {
-    try{
+    try {
       const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
       if (authHeader) {
         const token = authHeader.split(' ')[1];
@@ -101,27 +101,39 @@ export class PostsController {
     }
     catch (error) {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-        return{
-          message:'Token inválido ou expirado.',
+        return {
+          message: 'Token inválido ou expirado.',
         };
       }
-      return{
-        message:'Algo deu errado.',
+      return {
+        message: 'Algo deu errado.',
       };
     }
 
-    
+
   }
-@ApiTags('Post')
-@Delete('excluir/:id')
-@UseGuards(JwtAuthGuard)
- async excluirPost(@Req() r:Request, @Param('id') id: string){
-  const authHeader= r.headers['authorization'];
-  if(authHeader){
-    const token = authHeader.split(' ')[1];
-    return this.postsService.excluir(token, Number(id))
+  @ApiTags('Post')
+  @Delete('excluir/:id')
+  @UseGuards(JwtAuthGuard)
+  async excluirPost(@Req() r: Request, @Param('id') id: string) {
+    const authHeader = r.headers['authorization'];
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      return this.postsService.excluir(token, Number(id))
+    }
+    return { 'mensagem': 'Não foi possivel localizar o token' }
   }
-  return {'mensagem':'Não foi possivel localizar o token'}
- }
+
+  @ApiTags('Post')
+  @Post('curtir/:id')
+  @UseGuards(JwtAuthGuard)
+  curtirOuDescurtir(@Req() req: Request, @Param('id') id: string) {
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      return this.postsService.curtirOuDescurtir(token, +id);
+    }
+    return { message: 'Usuario não encontrado' };
+  }
 
 }

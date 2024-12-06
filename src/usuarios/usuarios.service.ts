@@ -527,6 +527,50 @@ export class UsuariosService {
 
   }
 
+  async seguirOuParar(token: string, id: number) {
+    const tokenDescodificado = this.jwt.verify(token);
+    const usuarioAtual = await this.persistencia.usuario.findUnique({
+      where: { id: tokenDescodificado.usuario },
+    });
+    if (!usuarioAtual) throw new NotFoundException('Erro localizando usuario');
+
+    const seguindo = await this.persistencia.usuarioSeguidor.findUnique({
+      where:{usuarioid_seguidorid: {usuarioid:id, seguidorid:tokenDescodificado.usuario}}
+    });
+
+    if (seguindo){
+      try {
+        const resultado = await this.persistencia.usuarioSeguidor.delete({
+          where:{usuarioid_seguidorid: {usuarioid:id, seguidorid:tokenDescodificado.usuario}}
+        })
+        return {
+          estado: 'ok',
+          dados: resultado,
+        };
+      
+      } 
+      catch (error) {
+        return {estado: 'nok', erro: error}
+      }
+    }
+    else{
+      try {
+        const resultado = await this.persistencia.usuarioSeguidor.create({
+          data:{usuarioid:id, seguidorid:tokenDescodificado.usuario}
+        });
+
+        return {
+          estado: 'ok',
+          dados: resultado,
+        };
+      
+      } 
+      catch (error) {
+        return {estado: 'nok', erro: error}
+      }
+    }
+
+  }
 
   async remove(id: number) {
     const resultado = await this.persistencia.usuario
