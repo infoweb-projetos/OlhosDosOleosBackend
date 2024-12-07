@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { CreatePastaDto } from './dto/create-pasta.dto';
-import { UpdatePastaDto } from './dto/update-pasta.dto';
+import { CriarPasta } from './dto/criarPasta.dto';
 import { PersistenciaService } from 'src/persistencia/persistencia.service';
 import { JwtService } from '@nestjs/jwt';
 import { Post } from '@prisma/client';
@@ -9,8 +8,26 @@ import { Post } from '@prisma/client';
 export class PastasService {
   constructor(private persistencia: PersistenciaService, private jwt: JwtService) { }
   
-  create(createPastaDto: CreatePastaDto) {
-    return 'This action adds a new pasta';
+  async criar(pasta: CriarPasta, token: string) {
+    try {
+      const tokenDescodificado = this.jwt.verify(token);
+      if (!pasta.nome) {
+        throw new BadRequestException('Nome da pasta inválido');
+      }
+      const resultado = await this.persistencia.pasta.create({
+        data:{
+          nome : pasta.nome,
+          usuarioid: tokenDescodificado.usuario, 
+        }
+      });
+      
+      return {
+        estado: 'ok',
+        dados: resultado,
+      }
+    } catch (error) {
+      return {message: error}
+    }
   }
 
   async getPostsByPasta(pastaId: string) {
@@ -87,10 +104,6 @@ export class PastasService {
 
   findOne(id: number) {
     return `This action returns a #${id} pasta`;
-  }
-
-  update(id: number, updatePastaDto: UpdatePastaDto) {
-    return `This action updates a #${id} pasta`;
   }
 
   remove(id: number) {
