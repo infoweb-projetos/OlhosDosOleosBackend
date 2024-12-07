@@ -403,11 +403,18 @@ export class PostsService {
     if (curtido){
       try {
         const resultado = await this.persistencia.curtida.delete({
-          where:{usuarioid_postid: {usuarioid:tokenDescodificado.usuario, postid:postId}}
+          where:{usuarioid_postid: {usuarioid:tokenDescodificado.usuario, postid:postId}},
+          include: {
+            post: {
+              include:{
+                curtidas: true,
+              }
+            }
+          }
         })
         return {
           estado: 'ok',
-          dados: resultado,
+          dados: {...resultado, foiApagado: true},
         };
       
       } 
@@ -418,12 +425,19 @@ export class PostsService {
     else{
       try {
         const resultado = await this.persistencia.curtida.create({
-          data:{usuarioid:tokenDescodificado.usuario, postid:postId}
+          data:{usuarioid:tokenDescodificado.usuario, postid:postId},
+          include: {
+            post: {
+              include:{
+                curtidas: true,
+              }
+            }
+          }
         });
 
         return {
           estado: 'ok',
-          dados: resultado,
+          dados: {...resultado, foiApagado: false},
         };
       
       } 
