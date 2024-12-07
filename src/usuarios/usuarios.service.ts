@@ -127,7 +127,6 @@ export class UsuariosService {
 
           }
         });
-        console.log(localizacaoNoBD.id);
 
         usuarioFinal = await this.persistencia.usuario.update({
           where: { id: usuario.id },
@@ -136,7 +135,6 @@ export class UsuariosService {
             localizacaoid: localizacaoNoBD.id,
           }
         });
-        console.log(usuarioFinal)
       }
 
       const { senha, ...dadosPublicosUsuario } = usuarioFinal;
@@ -176,6 +174,16 @@ export class UsuariosService {
               cidade: true,
             }
           },
+          seguidores :{
+            include:{
+              seguidor: true,
+            }
+          },
+          seguidos :{
+            include:{
+              usuario: true,
+            }
+          },
         },
       });
 
@@ -208,7 +216,10 @@ export class UsuariosService {
     }
 
   }
-  async acharUsuarioId(id: number) {
+  async acharUsuarioId(id: number, token: string) {
+    let tokenDescodificado = { usuario: 0 };
+    if (token) tokenDescodificado = this.jwt.verify(token);
+
     const usuario = await this.persistencia.usuario.findUnique({
       where: { id: id },
       include: {
@@ -216,6 +227,16 @@ export class UsuariosService {
           include: {
             estado: true,
             cidade: true,
+          }
+        },
+        seguidores :{
+          include:{
+            seguidor: true,
+          }
+        },
+        seguidos :{
+          include:{
+            usuario: true,
           }
         },
       },
@@ -226,8 +247,9 @@ export class UsuariosService {
       let localizacao = "";
       if (usuario.localizacao?.estadoid && usuario.localizacao?.cidadeid)
         localizacao = "Brasil, " + usuario.localizacao?.estado?.nome + ", " + usuario.localizacao?.cidade?.nome;
-
-      const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao };
+      let sigo = false
+      if(usuario.seguidores) sigo = usuario.seguidores.filter(s => tokenDescodificado && (s.seguidorid == tokenDescodificado.usuario)).length > 0;
+      const usuarioCompleto = { ...dadosPublicosUsuario, localizacao: localizacao, sigo: sigo };
 
       return {
         estado: 'ok',
@@ -312,7 +334,6 @@ export class UsuariosService {
     this.validarLink(usu.face, 'Facebook');
     this.validarLink(usu.zap, 'WhatsApp');
     this.validarLink(usu.youtube, 'YouTube');
-    console.log(usu.youtube);
 
     this.validarImagem(foto, 'foto');
     this.validarImagem(banner, 'banner');
@@ -490,7 +511,6 @@ export class UsuariosService {
   async removerBanner(token: string) {
     try {
       const tokenDescodificado = this.jwt.verify(token);
-      console.log(tokenDescodificado);
       const resultado = await this.persistencia.usuario
         .update({
           where: { id: tokenDescodificado.usuario },
@@ -500,7 +520,6 @@ export class UsuariosService {
           },
         })
         .then((usuario) => {
-          console.log("banner: " + usuario)
           const { senha, ...dadosPublicosUsuario } = usuario;
           return {
             estado: 'ok',
@@ -514,7 +533,6 @@ export class UsuariosService {
             mensagem: `usuario com ${tokenDescodificado.usuario} não existe!`,
           };
         });
-      console.log("banner re: " + resultado)
       return resultado;
     }
     catch (error) {
@@ -541,11 +559,23 @@ export class UsuariosService {
     if (seguindo){
       try {
         const resultado = await this.persistencia.usuarioSeguidor.delete({
-          where:{usuarioid_seguidorid: {usuarioid:id, seguidorid:tokenDescodificado.usuario}}
-        })
+          where:{usuarioid_seguidorid: {usuarioid:id, seguidorid:tokenDescodificado.usuario}},
+          include: {
+            usuario: {
+              include:{
+                seguidores:{
+                  include: {
+                    seguidor:true,
+                  }
+                },
+              }
+            },
+          }
+        });
+
         return {
           estado: 'ok',
-          dados: resultado,
+          dados:  {...resultado, seguindo: false},
         };
       
       } 
@@ -556,12 +586,23 @@ export class UsuariosService {
     else{
       try {
         const resultado = await this.persistencia.usuarioSeguidor.create({
-          data:{usuarioid:id, seguidorid:tokenDescodificado.usuario}
+          data:{usuarioid:id, seguidorid:tokenDescodificado.usuario},
+          include: {
+            usuario: {
+              include:{
+                seguidores:{
+                  include: {
+                    seguidor:true,
+                  }
+                },
+              }
+            },
+          }
         });
 
         return {
           estado: 'ok',
-          dados: resultado,
+          dados: {...resultado, seguindo: true},
         };
       
       } 

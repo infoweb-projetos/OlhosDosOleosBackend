@@ -137,8 +137,8 @@ model PostPasta {
 model UsuarioSeguidor {
   usuarioid Int 
   seguidorid Int 
-  usuario Usuario @relation("seguindo", fields: [usuarioid], references: [id], onDelete: Cascade)
-  seguidor Usuario @relation("seguidor", fields: [seguidorid], references: [id], onDelete: Cascade)   
+  usuario Usuario @relation("seguidor", fields: [usuarioid], references: [id], onDelete: Cascade)
+  seguidor Usuario @relation("seguindo", fields: [seguidorid], references: [id], onDelete: Cascade)   
   @@id([usuarioid, seguidorid])
 }
 

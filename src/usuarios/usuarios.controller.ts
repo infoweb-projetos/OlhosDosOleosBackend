@@ -42,12 +42,13 @@ export class UsuariosController {
   acharUsuario(@Req() req: Request, @Param('id') id: string) {
     try{
       const authHeader = req.headers['authorization']; // Use brackets para acessar propriedades desconhecidas
+      let token = "";
       if (authHeader) {
-        const token = authHeader.split(' ')[1];
+        token = authHeader.split(' ')[1];
         const ehMeuPerfil = this.usuariosService.ehMeuPerfil(token, +id);
         if (ehMeuPerfil) return this.usuariosService.acharUsuarioToken(token);
       }
-      return this.usuariosService.acharUsuarioId(+id);
+      return this.usuariosService.acharUsuarioId(+id, token);
     }
     catch (error) {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
@@ -69,7 +70,6 @@ export class UsuariosController {
       if (authHeader) {
         const token = authHeader.split(' ')[1];
         const ehMeuPerfil = this.usuariosService.ehMeuPerfil(token, +id);
-        console.log("Valor" + ehMeuPerfil);
         return{
           estado: 'ok',
           ehMeuPerfil: ehMeuPerfil,
@@ -113,10 +113,8 @@ export class UsuariosController {
   @UseGuards(JwtAuthGuard)
   removerBanner(@Req() req: Request) {
     const authHeader = req.headers['authorization'];
-    console.log("Controlador " + authHeader);
     if (authHeader) {
       const token = authHeader.split(' ')[1];
-      console.log("token auth " + token);
       return this.usuariosService.removerBanner(token);
     }
     return { message: 'Token não encontrado' };
