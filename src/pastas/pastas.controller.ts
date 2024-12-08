@@ -21,6 +21,18 @@ export class PastasController {
   }
 
   @ApiTags('Pastas')
+  @Post('favoritar/:id/:idpost')
+  @UseGuards(JwtAuthGuard)
+  favoritar(@Param('id') pastaId: string, @Param('idpost') postid: string, @Req() req: Request) {
+    const authHeader = req.headers['authorization']; 
+    if (authHeader) {
+      const token = authHeader.split(' ')[1]; 
+      return this.pastasService.favoritar(+pastaId, +postid, token);
+    }
+    return { message: 'Token não encontrado' };
+  }
+
+  @ApiTags('Pastas')
   @Get('minhas')
   @UseGuards(JwtAuthGuard)
   findAll(@Req() req: Request) {

@@ -30,6 +30,46 @@ export class PastasService {
     }
   }
 
+  async favoritar(pastaid: number, postid: number, token: string) {
+    try {
+      const tokenDescodificado = this.jwt.verify(token);
+      if (!tokenDescodificado.usuario)  throw new BadRequestException('Usuario inválido');
+      if (!pastaid) {
+        throw new BadRequestException('Nome da pasta inválido');
+      }
+      if (!postid) {
+        throw new BadRequestException('Post inválido');
+      }
+
+      const existe = await this.persistencia.postPasta.findUnique({
+        where:{
+          postid_pastaid:{
+            postid: postid,
+            pastaid: pastaid,
+          }
+        }
+      });
+
+      if (existe) return {
+        estado: 'ok',
+        dados: existe,
+      }
+
+      const resultado = await this.persistencia.postPasta.create({
+        data:{
+          postid : postid,
+          pastaid: pastaid, 
+        }
+      });
+      return {
+        estado: 'ok',
+        dados: resultado,
+      }
+    } catch (error) {
+      return {message: error}
+    }
+  }
+
   async getPostsByPasta(pastaId: string) {
     try { 
       // Convertendo pastaId para número
