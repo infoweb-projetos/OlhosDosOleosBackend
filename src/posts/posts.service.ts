@@ -19,7 +19,11 @@ export class PostsService {
           rascunho: false,
         },
         include:{
-          usuario: true,
+          usuario:{
+            include:{
+              seguidores: true,
+            }
+          },
           curtidas: true,
         },
         orderBy:{
