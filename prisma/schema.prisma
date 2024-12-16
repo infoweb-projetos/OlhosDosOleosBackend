@@ -69,6 +69,8 @@ model Usuario {
   seguidores  UsuarioSeguidor[] @relation("seguidor") 
   seguidos    UsuarioSeguidor[] @relation("seguindo")  
   postcurtidos  Curtida[]
+  comentarios Comentario[]
+  atividades Atividade[]
 }
 
 model Post{
@@ -89,6 +91,8 @@ model Post{
   excluido Boolean @default(false)
   entrada DateTime @default(now())
   curtidas  Curtida[] 
+  comentarios Comentario[]
+  atividades Atividade[]
 }
 
 model Processo{
@@ -150,4 +154,25 @@ model Curtida {
   @@id([usuarioid, postid])
 }
 
+model Comentario{
+  id Int @id @default(autoincrement())
+  usuarioid Int 
+  postid Int 
+  texto String
+  criacao DateTime @default(now())
+  post Post @relation(fields: [postid], references: [id], onDelete: Cascade)   
+  usuario Usuario @relation(fields: [usuarioid], references: [id], onDelete: Cascade)
+  atividades Atividade[]
+}
 
+model Atividade {
+  usuarioid Int 
+  postid Int
+  comentarioid Int? 
+  criacao DateTime @default(now())
+  post Post @relation(fields: [postid], references: [id], onDelete: Cascade)   
+  usuario Usuario @relation(fields: [usuarioid], references: [id], onDelete: Cascade)
+  comentario Comentario? @relation(fields: [comentarioid], references: [id], onDelete: Cascade)
+  @@id([usuarioid, postid])
+  @@unique([usuarioid, postid, comentarioid])
+}
