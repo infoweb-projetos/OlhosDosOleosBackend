@@ -86,6 +86,19 @@ export class PostsController {
     }
   }
 
+  @ApiTags('Post')
+  @Get('verpost/:id')
+  verPost(@Param('id') id: string) {
+    try {
+      return this.postsService.verpost(Number(id));
+    }
+    catch (error) {
+      return {
+        message: 'Algo deu errado.',
+      };
+    }
+  }
+
 
   @ApiTags('Post')
   @Get('usuario/:id')

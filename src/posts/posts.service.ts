@@ -57,6 +57,43 @@ export class PostsService {
     };
   }
 
+  async verpost(id: number) {
+    return {
+      estado: 'ok',
+      dados: await this.persistencia.post.findUnique({
+        where:{
+          id: id,
+        },
+        include:{
+          tags: {
+            select: {
+              tag: {
+                select: {
+                  nome: true,
+                  ferramenta: true,
+                }
+              }
+            }
+          },
+          processo: true,
+          comentarios: true,
+          usuario: {
+            include:{
+              localizacao: {
+                select:{
+                  estado: true,
+                  cidade:true, 
+                }
+              },
+              seguidores: true,
+            }
+          },
+          curtidas: true,
+        }
+      }),
+    };
+  }
+
   async listarPostUsuario(id : number) {
     return {
       estado: 'ok',
