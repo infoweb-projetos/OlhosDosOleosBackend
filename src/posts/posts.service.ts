@@ -454,15 +454,9 @@ export class PostsService {
           }
         })
 
-        const atividade = await this.persistencia.atividade.delete({
-          where:{
-            usuarioid_postid: {usuarioid: tokenDescodificado.usuario ,postid: postId},
-          },
-        }).catch(error => console.log(error));
-
         return {
           estado: 'ok',
-          dados: {...resultado, ...atividade, foiApagado: true},
+          dados: {...resultado, foiApagado: true},
         };
       
       } 
