@@ -23,6 +23,23 @@ export class ComentariosService {
             }),
         };
     }
+    async apagar(id: number) {
+        const atividades = await this.persistencia.atividade.deleteMany({
+            where:{
+               comentarioid: id,
+            },
+        }).catch(error => console.log(error));
+
+        return {
+            estado: 'ok',
+            dados: await this.persistencia.comentario.delete({
+                where:{
+                    id: id,
+                },
+            }),
+            atividades: atividades,
+        };
+    }
 
     async criar(token : string, comentario: CriarComentarioDto) {
         const tokenDescodificado = this.jwt.verify(token);

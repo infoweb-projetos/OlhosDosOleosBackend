@@ -30,6 +30,35 @@ export class PastasService {
     }
   }
 
+  async taFavoritado(postid: number, token: string) {
+    try {
+      const tokenDescodificado = this.jwt.verify(token);
+      if (!tokenDescodificado.usuario) return { favoritado: false };
+  
+      if (!postid) {
+        return { favoritado: false };
+      }
+  
+      const pastas = await this.persistencia.pasta.findMany({
+        where: {
+          usuarioid: tokenDescodificado.usuario,
+        },
+        include: {
+          posts: true,
+        },
+      });
+  
+      const favoritado = pastas.some(pasta => 
+        pasta.posts.some(post => post.postid === postid) 
+      );
+  
+      return { favoritado };
+  
+    } catch (error) {
+      return { message: error.message, favoritado: false };
+    }
+  }
+
   async favoritar(pastaid: number, postid: number, token: string) {
     try {
       const tokenDescodificado = this.jwt.verify(token);

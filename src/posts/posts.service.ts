@@ -443,6 +443,22 @@ export class PostsService {
     
     if (curtido){
       try {
+        const atividadeBD = await this.persistencia.atividade.findFirst({
+          where:{
+            usuarioid: tokenDescodificado.usuario,
+            postid: postId,
+            comentarioid: null,
+          },
+        }).catch(error => console.log(error));
+
+        if (atividadeBD){
+          await this.persistencia.atividade.delete({
+            where:{
+              id: atividadeBD.id,
+            },
+          }).catch(error => console.log(error));
+        }
+        
         const resultado = await this.persistencia.curtida.delete({
           where:{usuarioid_postid: {usuarioid:tokenDescodificado.usuario, postid:postId}},
           include: {

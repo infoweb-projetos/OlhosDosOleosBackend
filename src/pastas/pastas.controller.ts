@@ -45,6 +45,19 @@ export class PastasController {
   }
 
   @ApiTags('Pastas')
+  @Get('favoritado/post/:id')
+  taFavoritado(@Param('id') postid: string, @Req() req: Request) {
+    try {
+      const authHeader = req.headers['authorization']; 
+      const token = authHeader.split(' ')[1]; 
+      return this.pastasService.taFavoritado(+postid, token);
+    } catch (error) {
+      return { message: error.message, favoritado: false };
+    }
+ 
+  }
+
+  @ApiTags('Pastas')
   @Get(':id/posts')
   @UseGuards(JwtAuthGuard)
   async getPostsByPasta(@Param('id') pastaId: string, @Req() req: Request) {
