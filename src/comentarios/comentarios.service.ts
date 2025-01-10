@@ -51,7 +51,7 @@ export class ComentariosService {
                texto: comentario.texto ?? null,
             },
         })
-
+        
         await this.persistencia.atividade.create({
             data:{
                usuarioid: tokenDescodificado.usuario,
@@ -62,7 +62,14 @@ export class ComentariosService {
 
         return {
             estado: 'ok',
-            dados: comentarioFeito,
+            dados: await this.persistencia.comentario.findUnique({
+                where:{
+                    id: comentarioFeito.id,
+                },
+                include:{
+                    usuario: true,
+                },
+            }),
         };
     }
 }
