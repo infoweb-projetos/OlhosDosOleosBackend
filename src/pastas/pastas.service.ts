@@ -30,6 +30,27 @@ export class PastasService {
     }
   }
 
+  async excluirPost(pastaid : number, postid :number) {
+    try {
+      const resultado = await this.persistencia.postPasta.deleteMany({
+        where:{
+          postid: postid,
+          pastaid: pastaid,
+        }
+      });
+      
+      return {
+        estado: 'ok',
+        dados: resultado,
+      }
+
+    } catch (error) {
+      return {message: error}
+    }
+  }
+
+
+
   async taFavoritado(postid: number, token: string) {
     try {
       const tokenDescodificado = this.jwt.verify(token);
@@ -178,4 +199,34 @@ export class PastasService {
   remove(id: number) {
     return `This action removes a #${id} pasta`;
   }
+
+
+
+  async excluir(token:string, pastaId:number){
+    try{
+      const tokenDecodificado = this.jwt.verify(token);
+      const pasta= await this.persistencia.pasta.findUnique({
+        where:{id:pastaId},
+      });
+      if (!pasta){
+        throw new BadRequestException("O pasta não foi encontrada ou não existe!");
+      }
+      if (pasta.usuarioid !== tokenDecodificado.usuario){
+        throw new BadRequestException("Você não tem permissão para excluir essa pasta!");
+      }
+      await this.persistencia.postPasta.deleteMany({
+        where:{pastaid: pastaId}
+      });
+      await this.persistencia.pasta.delete({
+        where:{id:pastaId},
+      });
+      return {'estado':'OK', 'mensagem':'A pasta foi excluído com sucesso!'}
+    }catch(error){
+      if(error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError'){
+        throw new BadRequestException ('Token inválido ou expirado!')  
+      }
+      throw new BadRequestException('Houve um erro na operação')
+    }
+    }
 }
+

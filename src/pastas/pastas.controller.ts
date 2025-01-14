@@ -73,8 +73,27 @@ export class PastasController {
     return this.pastasService.findOne(+id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pastasService.remove(+id);
+  @ApiTags('Pastas')
+  @Delete('excluir/:id')
+  @UseGuards(JwtAuthGuard)
+  async excluirPasta(@Req() r: Request, @Param('id') id: string) {
+    const authHeader = r.headers['authorization'];
+    if (authHeader) {
+      const token = authHeader.split(' ')[1];
+      return this.pastasService.excluir(token, Number(id))
+    }
+    return { 'mensagem': 'Não foi possivel localizar o token' }
   }
+
+  @ApiTags('Pastas')
+  @Delete('excluir/:idpasta/:idpost')
+  @UseGuards(JwtAuthGuard)
+  async excluirPost(@Req() r: Request, @Param('idpasta') idpasta: string, @Param('idpost') idpost: string) {
+    const authHeader = r.headers['authorization'];
+    if (authHeader) {
+      return this.pastasService.excluirPost(+idpasta, +idpost)
+    }
+    return { 'mensagem': 'Não foi possivel localizar o token' }
+  }
+
 }

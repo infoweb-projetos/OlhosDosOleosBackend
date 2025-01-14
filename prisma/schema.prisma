@@ -125,6 +125,7 @@ model PostTag {
 model Pasta {
   id Int @id @default(autoincrement())
   nome String
+  descricao String?
   posts PostPasta[]
   usuario Usuario @relation(fields: [usuarioid], references: [id]) 
   usuarioid Int
