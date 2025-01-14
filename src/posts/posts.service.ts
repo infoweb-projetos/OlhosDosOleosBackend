@@ -25,6 +25,7 @@ export class PostsService {
             }
           },
           curtidas: true,
+          comentarios: true,
         },
         orderBy:{
           entrada: "desc",
